@@ -23,7 +23,11 @@ export default async function PlayPage() {
 
   return (
     <main className="h-full w-full bg-neutral-900">
-      <PlayClient username={authUser?.username ?? 'Player'} bestLevel={progress.bestLevel} />
+      <PlayClient
+        userId={user.id}
+        username={authUser?.username ?? 'Player'}
+        bestLevel={progress.bestLevel}
+      />
     </main>
   );
 }
