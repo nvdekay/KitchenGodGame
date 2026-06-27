@@ -54,6 +54,29 @@ export interface Database {
         Update: { role?: AppRole };
         Relationships: [];
       };
+      player_progress: {
+        Row: {
+          user_id: string;
+          best_level: number;
+          best_score: number;
+          last_played_at: string | null;
+          updated_at: string;
+        };
+        Insert: {
+          user_id: string;
+          best_level?: number;
+          best_score?: number;
+          last_played_at?: string | null;
+          updated_at?: string;
+        };
+        Update: {
+          best_level?: number;
+          best_score?: number;
+          last_played_at?: string | null;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: {
@@ -64,6 +87,10 @@ export interface Database {
       get_email_for_username: {
         Args: { p_username: string };
         Returns: string;
+      };
+      record_level_progress: {
+        Args: { p_level: number; p_score: number };
+        Returns: undefined;
       };
     };
     Enums: { app_role: AppRole };
