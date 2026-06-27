@@ -61,6 +61,10 @@ export interface Database {
         Args: { _user_id: string; _role: AppRole };
         Returns: boolean;
       };
+      get_email_for_username: {
+        Args: { p_username: string };
+        Returns: string;
+      };
     };
     Enums: { app_role: AppRole };
     CompositeTypes: Record<string, never>;

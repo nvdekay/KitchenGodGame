@@ -6,6 +6,7 @@
  * re-exported here is private to the feature and free to change.
  */
 export { LoginForm } from './components/LoginForm';
+export { SignupForm } from './components/SignupForm';
 export { useAuth, useSignIn, useSignUp, useSignOut } from './hooks/useAuth';
 export { loginSchema, signupSchema } from './schemas/auth.schema';
 export type { LoginInput, SignupInput } from './schemas/auth.schema';

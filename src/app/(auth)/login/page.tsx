@@ -1,12 +1,19 @@
 import { LoginForm } from '@/features/auth';
 
-/** Login route. Thin — it just composes the auth feature's public component.
+/** Login route. Reads `?registered=1` (set after signup) on the server and
+ *  passes it down, so the form can show a success banner without useSearchParams.
  *  Route protection (redirect when already signed in) is handled by middleware. */
-export default function LoginPage() {
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ registered?: string }>;
+}) {
+  const { registered } = await searchParams;
+
   return (
     <main className="flex min-h-screen flex-col items-center justify-center gap-8 p-8">
-      <h1 className="text-2xl font-bold">Sign in</h1>
-      <LoginForm />
+      <h1 className="text-2xl font-bold">Đăng nhập</h1>
+      <LoginForm justRegistered={registered === '1'} />
     </main>
   );
 }

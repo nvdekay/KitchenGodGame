@@ -14,13 +14,39 @@ const log = createLogger('feature:auth');
  * never touch Supabase directly.
  */
 
+/**
+ * Resolve the login identifier to an email. If it already looks like an email we
+ * use it directly; otherwise we treat it as a username and ask the DB function
+ * for the matching email (Supabase Auth can't authenticate by username).
+ */
+async function resolveEmail(
+  supabase: ReturnType<typeof createClient>,
+  identifier: string,
+): Promise<string | null> {
+  if (identifier.includes('@')) return identifier;
+  const { data, error } = await supabase.rpc('get_email_for_username', {
+    p_username: identifier,
+  });
+  if (error) log.warn('username resolution failed', { message: error.message });
+  return data ?? null;
+}
+
 export async function signIn(input: LoginInput): Promise<AuthUser> {
   const supabase = createClient();
-  const { data, error } = await supabase.auth.signInWithPassword(input);
+
+  const email = await resolveEmail(supabase, input.identifier.trim());
+  // Same generic error whether the username is unknown or the password is wrong
+  // — never reveal which usernames/emails exist.
+  if (!email) throw new AppError('UNAUTHENTICATED', 'Sai tài khoản hoặc mật khẩu.');
+
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email,
+    password: input.password,
+  });
 
   if (error || !data.user) {
     log.warn('sign-in failed', { message: error?.message });
-    throw new AppError('UNAUTHENTICATED', 'Invalid email or password.');
+    throw new AppError('UNAUTHENTICATED', 'Sai tài khoản hoặc mật khẩu.');
   }
 
   const user = await getAuthUser(supabase, {
@@ -35,14 +61,18 @@ export async function signIn(input: LoginInput): Promise<AuthUser> {
 
 export async function signUp(input: SignupInput): Promise<void> {
   const supabase = createClient();
-  // The DB trigger (see migration) creates the profile + default 'player' role
-  // from this metadata, so signup stays a single round-trip.
+  // The DB trigger (see migration 0001) creates the profile + default 'player'
+  // role from this metadata, so signup stays a single round-trip. If the email
+  // OR username is taken, the insert/trigger fails and Supabase returns an error.
   const { error } = await supabase.auth.signUp({
     email: input.email,
     password: input.password,
     options: { data: { username: input.username } },
   });
-  if (error) throw new AppError('CONFLICT', error.message);
+  if (error) {
+    log.warn('sign-up failed', { message: error.message });
+    throw new AppError('CONFLICT', 'Email hoặc username đã được sử dụng.');
+  }
 }
 
 export async function signOut(): Promise<void> {

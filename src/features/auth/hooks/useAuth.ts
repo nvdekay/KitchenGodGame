@@ -39,8 +39,14 @@ export function useSignIn() {
 }
 
 export function useSignUp() {
+  const router = useRouter();
   return useMutation({
     mutationFn: (input: SignupInput) => authService.signUp(input),
+    onSuccess: () => {
+      // Per product flow: after registering, send the user to the login page
+      // (we do not auto-sign-in). The banner there confirms success.
+      router.push('/login?registered=1');
+    },
   });
 }
 

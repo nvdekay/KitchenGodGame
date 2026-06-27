@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { loginSchema, type LoginInput } from '../schemas/auth.schema';
@@ -8,11 +9,10 @@ import { Button } from '@/components/ui/Button';
 import { isAppError } from '@/lib/errors';
 
 /**
- * Example feature component wiring the full client stack:
- * React Hook Form + Zod (validation) → feature hook (React Query) → service.
- * Intentionally minimal styling; it demonstrates the data flow, not the design.
+ * Sign-in form. The single identifier field accepts an email OR a username; the
+ * auth service resolves a username to its email before calling Supabase.
  */
-export function LoginForm() {
+export function LoginForm({ justRegistered = false }: { justRegistered?: boolean }) {
   const signIn = useSignIn();
   const {
     register,
@@ -24,23 +24,31 @@ export function LoginForm() {
 
   return (
     <form onSubmit={onSubmit} className="flex w-full max-w-sm flex-col gap-4">
+      {justRegistered && (
+        <p className="rounded bg-green-50 px-3 py-2 text-sm text-green-700">
+          Đăng ký thành công! Đăng nhập để bắt đầu.
+        </p>
+      )}
+
       <div className="flex flex-col gap-1">
-        <label htmlFor="email" className="text-sm font-medium">
-          Email
+        <label htmlFor="identifier" className="text-sm font-medium">
+          Email hoặc Username
         </label>
         <input
-          id="email"
-          type="email"
-          autoComplete="email"
+          id="identifier"
+          type="text"
+          autoComplete="username"
           className="rounded border px-3 py-2"
-          {...register('email')}
+          {...register('identifier')}
         />
-        {errors.email && <p className="text-sm text-red-600">{errors.email.message}</p>}
+        {errors.identifier && (
+          <p className="text-sm text-red-600">{errors.identifier.message}</p>
+        )}
       </div>
 
       <div className="flex flex-col gap-1">
         <label htmlFor="password" className="text-sm font-medium">
-          Password
+          Mật khẩu
         </label>
         <input
           id="password"
@@ -54,13 +62,20 @@ export function LoginForm() {
 
       {signIn.isError && (
         <p className="text-sm text-red-600">
-          {isAppError(signIn.error) ? signIn.error.message : 'Sign-in failed.'}
+          {isAppError(signIn.error) ? signIn.error.message : 'Đăng nhập thất bại.'}
         </p>
       )}
 
       <Button type="submit" disabled={isSubmitting || signIn.isPending}>
-        {signIn.isPending ? 'Signing in…' : 'Sign in'}
+        {signIn.isPending ? 'Đang đăng nhập…' : 'Đăng nhập'}
       </Button>
+
+      <p className="text-center text-sm text-neutral-600">
+        Chưa có tài khoản?{' '}
+        <Link href="/signup" className="font-medium text-brand hover:underline">
+          Đăng ký
+        </Link>
+      </p>
     </form>
   );
 }
