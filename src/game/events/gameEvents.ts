@@ -8,7 +8,7 @@
  * churn without breaking React, and vice-versa.
  *
  * Two directions:
- *  - OUT  (game → React): lifecycle/progress notifications.
+ *  - OUT  (game → React): lifecycle/progress/gameplay notifications.
  *  - IN   (React → game): commands the UI issues (start scene, pause, …).
  *
  * Add new gameplay events HERE with a payload in `GameEventMap`. The compiler
@@ -16,13 +16,18 @@
  */
 
 export const GameEvents = {
-  // OUT — game → React
+  // OUT — game → React (lifecycle)
   GAME_BOOTED: 'game:booted',
   LOAD_PROGRESS: 'game:load-progress',
   ASSETS_LOADED: 'game:assets-loaded',
   SCENE_STARTED: 'game:scene-started',
   SCENE_READY: 'game:scene-ready',
   GAME_ERROR: 'game:error',
+
+  // OUT — game → React (gameplay)
+  LEVEL_STARTED: 'game:level-started',
+  SCORE_CHANGED: 'game:score-changed',
+  LEVEL_COMPLETED: 'game:level-completed',
 
   // IN — React → game (commands)
   CMD_START_SCENE: 'cmd:start-scene',
@@ -39,6 +44,9 @@ export interface GameEventMap {
   [GameEvents.SCENE_STARTED]: { key: string };
   [GameEvents.SCENE_READY]: { key: string };
   [GameEvents.GAME_ERROR]: { message: string };
+  [GameEvents.LEVEL_STARTED]: { level: number };
+  [GameEvents.SCORE_CHANGED]: { score: number };
+  [GameEvents.LEVEL_COMPLETED]: { level: number; score: number };
   [GameEvents.CMD_START_SCENE]: { key: string; data?: Record<string, unknown> };
   [GameEvents.CMD_PAUSE]: Record<string, never>;
   [GameEvents.CMD_RESUME]: Record<string, never>;

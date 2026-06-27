@@ -3,7 +3,8 @@
 export const SceneKeys = {
   Boot: 'BootScene',
   Loading: 'LoadingScene',
-  Main: 'MainScene',
+  Menu: 'MenuScene',
+  Game: 'GameScene',
 } as const;
 
 export type SceneKey = (typeof SceneKeys)[keyof typeof SceneKeys];

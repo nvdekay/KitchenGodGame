@@ -28,14 +28,23 @@ class GameManagerImpl {
   }
 
   /** Create the game inside `parent`. Idempotent — returns the existing game if
-   *  already created (handles StrictMode remounts). */
-  create(parent: HTMLElement): Phaser.Game {
+   *  already created (handles StrictMode remounts).
+   *
+   *  `initialData` is written into Phaser's registry BEFORE scenes render, so
+   *  scenes can read React-provided values (username, best level) without the
+   *  engine ever importing React. This is the one-way data-in channel. */
+  create(parent: HTMLElement, initialData?: Record<string, unknown>): Phaser.Game {
     if (this.game) {
       log.debug('create() called while running — reusing existing instance');
       return this.game;
     }
     log.info('creating Phaser game');
     this.game = new Phaser.Game(createGameConfig(parent));
+    if (initialData) {
+      for (const [key, value] of Object.entries(initialData)) {
+        this.game.registry.set(key, value);
+      }
+    }
     this.sceneManager = new SceneManager(this.game);
     return this.game;
   }

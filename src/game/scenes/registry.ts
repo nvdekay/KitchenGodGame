@@ -1,7 +1,8 @@
 import type Phaser from 'phaser';
 import { BootScene } from './BootScene';
 import { LoadingScene } from './LoadingScene';
-import { MainScene } from './MainScene';
+import { MenuScene } from './MenuScene';
+import { GameScene } from './GameScene';
 
 /**
  * Scene registration system.
@@ -11,14 +12,14 @@ import { MainScene } from './MainScene';
  * push it here. Nothing else in the codebase needs to change — GameManager reads
  * this array.
  *
- * Order matters only for the FIRST scene (it auto-starts). Boot → Loading →
- * Main is the standard chain; later scenes are started explicitly by key.
+ * Chain: Boot → Loading → Menu → Game. Later scenes are started explicitly by key.
  */
 export type SceneClass = new () => Phaser.Scene;
 
 export const sceneRegistry: SceneClass[] = [
   BootScene,
   LoadingScene,
-  MainScene,
-  // Register future scenes here, e.g. KitchenScene, ChallengeScene, MapScene.
+  MenuScene,
+  GameScene,
+  // Register future scenes here, e.g. ChallengeScene, MapScene.
 ];

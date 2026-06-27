@@ -27,6 +27,6 @@ export class LoadingScene extends Phaser.Scene {
   }
 
   create(): void {
-    this.scene.start(SceneKeys.Main);
+    this.scene.start(SceneKeys.Menu);
   }
 }

@@ -19,6 +19,8 @@ export function useGameBridge() {
   const setPhase = useGameStore((s) => s.setPhase);
   const setActiveScene = useGameStore((s) => s.setActiveScene);
   const setLoadProgress = useGameStore((s) => s.setLoadProgress);
+  const setLevel = useGameStore((s) => s.setLevel);
+  const setScore = useGameStore((s) => s.setScore);
 
   useEffect(() => {
     const offs = [
@@ -37,8 +39,15 @@ export function useGameBridge() {
       }),
 
       GameManager.on(GameEvents.GAME_ERROR, () => setPhase('error')),
+
+      // Gameplay → HUD store + app bus (analytics/achievements/persistence).
+      GameManager.on(GameEvents.LEVEL_STARTED, ({ level }) => setLevel(level)),
+      GameManager.on(GameEvents.SCORE_CHANGED, ({ score }) => setScore(score)),
+      GameManager.on(GameEvents.LEVEL_COMPLETED, ({ level, score }) => {
+        eventBus.emit(AppEvents.LEVEL_COMPLETED, { level, score });
+      }),
     ];
 
     return () => offs.forEach((off) => off());
-  }, [setPhase, setActiveScene, setLoadProgress]);
+  }, [setPhase, setActiveScene, setLoadProgress, setLevel, setScore]);
 }

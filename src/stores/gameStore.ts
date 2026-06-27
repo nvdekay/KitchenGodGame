@@ -21,9 +21,15 @@ interface GameState {
   activeScene: string | null;
   /** 0..1 asset load progress, surfaced by LoadingScene via the bridge. */
   loadProgress: number;
+  /** Current gameplay level + score, mirrored from Phaser by the bridge. These
+   *  are small derived values for the HUD — NOT the game simulation itself. */
+  level: number;
+  score: number;
   setPhase: (phase: GamePhase) => void;
   setActiveScene: (scene: string | null) => void;
   setLoadProgress: (p: number) => void;
+  setLevel: (level: number) => void;
+  setScore: (score: number) => void;
   reset: () => void;
 }
 
@@ -31,8 +37,13 @@ export const useGameStore = create<GameState>((set) => ({
   phase: 'idle',
   activeScene: null,
   loadProgress: 0,
+  level: 1,
+  score: 0,
   setPhase: (phase) => set({ phase }),
   setActiveScene: (activeScene) => set({ activeScene }),
   setLoadProgress: (loadProgress) => set({ loadProgress }),
-  reset: () => set({ phase: 'idle', activeScene: null, loadProgress: 0 }),
+  setLevel: (level) => set({ level }),
+  setScore: (score) => set({ score }),
+  reset: () =>
+    set({ phase: 'idle', activeScene: null, loadProgress: 0, level: 1, score: 0 }),
 }));
