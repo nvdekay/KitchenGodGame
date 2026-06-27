@@ -1,4 +1,4 @@
-import Phaser from 'phaser';
+import * as Phaser from 'phaser';
 import { SceneKeys } from './keys';
 import { GameEvents } from '../events/gameEvents';
 

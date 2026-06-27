@@ -15,6 +15,12 @@ export type Json = string | number | boolean | null | { [key: string]: Json | un
 export type AppRole = 'player' | 'admin';
 
 export interface Database {
+  // Marker the Supabase client uses to resolve schema types. The CLI emits this
+  // in generated types; we include it so the hand-written placeholder behaves
+  // identically until you run `npm run db:types`.
+  __InternalSupabase: {
+    PostgrestVersion: '12';
+  };
   public: {
     Tables: {
       profiles: {

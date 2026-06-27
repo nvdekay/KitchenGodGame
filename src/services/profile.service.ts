@@ -1,11 +1,11 @@
-import type { SupabaseClient } from '@supabase/supabase-js';
 import type { AuthUser } from '@/types/auth.types';
-import type { Database, AppRole } from '@/types/database.types';
+import type { AppRole } from '@/types/database.types';
+import type { TypedSupabaseClient } from '@/lib/supabase/types';
 import { createLogger } from '@/lib/logger';
 
 const log = createLogger('service:profile');
 
-type DB = SupabaseClient<Database>;
+type DB = TypedSupabaseClient;
 
 /**
  * Profile/role data access. Accepts a Supabase client by dependency injection so
@@ -24,7 +24,7 @@ export async function getAuthUser(
   const [{ data: profile }, { data: roleRow }] = await Promise.all([
     db
       .from('profiles')
-      .select('username, display_name, avatar_url')
+      .select('username,display_name,avatar_url')
       .eq('id', identity.id)
       .maybeSingle(),
     db.from('user_roles').select('role').eq('user_id', identity.id).maybeSingle(),

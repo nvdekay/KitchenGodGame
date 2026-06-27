@@ -1,5 +1,4 @@
-import type { SupabaseClient } from '@supabase/supabase-js';
-import type { Database } from '@/types/database.types';
+import type { TypedSupabaseClient } from '@/lib/supabase/types';
 
 /**
  * TEMPLATE service. Copy the feature folder, rename, and replace this with real
@@ -12,7 +11,7 @@ export interface ExampleItem {
 }
 
 export async function listExampleItems(
-  _db: SupabaseClient<Database>,
+  _db: TypedSupabaseClient,
 ): Promise<ExampleItem[]> {
   // Placeholder — wire to a real table once this feature has a migration.
   return [];

@@ -14,7 +14,18 @@ const eslintConfig = [
       // Encourage explicit boundaries between feature modules.
       '@typescript-eslint/consistent-type-imports': 'warn',
       'no-console': ['warn', { allow: ['warn', 'error'] }],
+      // `_`-prefixed args/vars are intentional placeholders (e.g. injected-but-
+      // unused clients in template/stub services).
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        { argsIgnorePattern: '^_', varsIgnorePattern: '^_', caughtErrorsIgnorePattern: '^_' },
+      ],
     },
+  },
+  {
+    // The logger is the single sanctioned place to call console directly.
+    files: ['src/lib/logger.ts'],
+    rules: { 'no-console': 'off' },
   },
 ];
 

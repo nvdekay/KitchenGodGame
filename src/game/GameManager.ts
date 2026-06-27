@@ -1,4 +1,4 @@
-import Phaser from 'phaser';
+import * as Phaser from 'phaser';
 import { createGameConfig } from './config';
 import { SceneManager } from './SceneManager';
 import { GameEvents, type GameEventMap, type GameEventName } from './events/gameEvents';

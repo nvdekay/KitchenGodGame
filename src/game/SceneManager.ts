@@ -15,15 +15,21 @@ const log = createLogger('game:scenes');
 export class SceneManager {
   constructor(private readonly game: Phaser.Game) {}
 
-  /** Start a scene, stopping the current one (the common transition). */
+  /** Start (or restart) a scene. */
   start(key: SceneKey, data?: Record<string, unknown>): void {
     log.debug('start scene', { key });
     this.game.scene.start(key, data);
   }
 
+  /** Switch from one scene to another (stops `from`, starts `to`). */
+  switch(from: SceneKey, to: SceneKey): void {
+    log.debug('switch scene', { from, to });
+    this.game.scene.switch(from, to);
+  }
+
   /** Run a scene in parallel (e.g. a HUD overlay on top of gameplay). */
   launch(key: SceneKey, data?: Record<string, unknown>): void {
-    this.game.scene.launch(key, data);
+    this.game.scene.run(key, data);
   }
 
   stop(key: SceneKey): void {
