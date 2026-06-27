@@ -92,6 +92,10 @@ export interface Database {
         Args: { p_level: number; p_score: number };
         Returns: undefined;
       };
+      get_leaderboard: {
+        Args: { p_limit?: number };
+        Returns: { username: string; best_level: number; best_score: number }[];
+      };
     };
     Enums: { app_role: AppRole };
     CompositeTypes: Record<string, never>;
