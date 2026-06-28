@@ -1,16 +1,22 @@
 'use client';
 
 import { useState } from 'react';
+import { motion, useReducedMotion } from 'motion/react';
 import { Button } from '@/components/ui/Button';
 import { isAppError } from '@/lib/errors';
+import { fireConfetti } from '@/lib/confetti';
 import { useStage, useSubmitStage } from '../hooks/useQuiz';
 import { QuestionCard } from './QuestionCard';
 import type { AnswerMap } from '../types';
 
+const container = { hidden: {}, show: { transition: { staggerChildren: 0.07 } } };
+const item = { hidden: { opacity: 0, y: 14 }, show: { opacity: 1, y: 0 } };
+
 /**
  * Play one stage: render its questions, collect answers, submit for server-side
- * grading. A pass (all correct) unlocks the next stage; a miss shows the score
- * and lets the player retry (unlimited).
+ * grading. A pass (all correct) unlocks the next stage and fires confetti; a
+ * miss shakes the score banner and lets the player retry (unlimited).
+ * Confetti/motion respect the user's reduced-motion preference.
  */
 export function StagePlay({
   ord,
@@ -28,14 +34,14 @@ export function StagePlay({
   const { data: stage, isLoading, isError, error } = useStage(ord);
   const submit = useSubmitStage(userId);
   const [answers, setAnswers] = useState<AnswerMap>({});
+  const [shakeKey, setShakeKey] = useState(0);
+  const reduced = useReducedMotion();
 
   if (isLoading) return <p className="mx-auto max-w-xl text-neutral-500">Đang tải…</p>;
   if (isError || !stage) {
     return (
       <div className="mx-auto max-w-xl space-y-3">
-        <p className="text-red-600">
-          {isAppError(error) ? error.message : 'Không tải được chặng.'}
-        </p>
+        <p className="text-red-600">{isAppError(error) ? error.message : 'Không tải được chặng.'}</p>
         <Button variant="secondary" onClick={onBack}>
           ← Quay lại
         </Button>
@@ -46,7 +52,19 @@ export function StagePlay({
   const passed = submit.data?.passed ?? false;
   const isLast = ord >= total;
 
-  const onSubmit = () => submit.mutate({ ord, answers });
+  const onSubmit = () =>
+    submit.mutate(
+      { ord, answers },
+      {
+        onSuccess: (res) => {
+          if (res.passed) {
+            if (!reduced) void fireConfetti(isLast);
+          } else {
+            setShakeKey((k) => k + 1);
+          }
+        },
+      },
+    );
 
   return (
     <div className="mx-auto max-w-xl space-y-4">
@@ -64,32 +82,45 @@ export function StagePlay({
           Chặng này chưa có câu hỏi. Admin cần thêm câu hỏi.
         </p>
       ) : (
-        stage.questions.map((q, i) => (
-          <QuestionCard
-            key={q.id}
-            question={q}
-            index={i}
-            value={answers[q.id] ?? []}
-            onChange={(next) => setAnswers((a) => ({ ...a, [q.id]: next }))}
-          />
-        ))
+        <motion.div variants={container} initial="hidden" animate="show" className="space-y-3">
+          {stage.questions.map((q, i) => (
+            <motion.div key={q.id} variants={item}>
+              <QuestionCard
+                question={q}
+                index={i}
+                value={answers[q.id] ?? []}
+                onChange={(next) => setAnswers((a) => ({ ...a, [q.id]: next }))}
+              />
+            </motion.div>
+          ))}
+        </motion.div>
       )}
 
       {submit.data && !passed && (
-        <p className="rounded bg-amber-50 px-3 py-2 text-amber-700">
+        <motion.p
+          key={shakeKey}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1, x: [0, -8, 8, -5, 5, 0] }}
+          transition={{ duration: 0.4 }}
+          className="rounded bg-amber-50 px-3 py-2 text-amber-700"
+        >
           Đúng {submit.data.correct}/{submit.data.total}. Chưa đạt — thử lại nhé!
-        </p>
+        </motion.p>
       )}
 
       {passed ? (
-        <div className="space-y-3 rounded bg-green-50 p-4 text-green-700">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95, y: 6 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          className="space-y-3 rounded bg-green-50 p-4 text-green-700"
+        >
           <p className="font-medium">✓ Chính xác! Bạn đã qua {stage.title}.</p>
           {isLast ? (
             <Button onClick={onBack}>🎉 Hoàn thành! Về danh sách chặng</Button>
           ) : (
             <Button onClick={() => onNext(ord + 1)}>Chặng tiếp theo →</Button>
           )}
-        </div>
+        </motion.div>
       ) : (
         <Button onClick={onSubmit} disabled={submit.isPending || stage.questions.length === 0}>
           {submit.isPending ? 'Đang nộp…' : 'Nộp bài'}
