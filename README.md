@@ -175,3 +175,4 @@ a feature.
 | `npm run lint`      | ESLint                                   |
 | `npm run db:push`   | Apply migrations to linked Supabase      |
 | `npm run db:types`  | Regenerate `src/types/database.types.ts` |
+| `npm run loadtest`  | Simulate concurrent players (self-cleaning) — `npm run loadtest -- --users 50` |
