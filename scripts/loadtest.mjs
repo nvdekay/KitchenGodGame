@@ -29,23 +29,35 @@ const arg = (name, def) => {
 };
 const USERS = Number(arg('users', 10));
 const CONCURRENCY = Number(arg('concurrency', 25));
+// Stagger each user's start by `ramp` ms × index, so sign-ins arrive spread over
+// time like real players (a 0ms ramp reproduces a synchronized-login burst, which
+// hits Supabase Auth rate limits). Default ~120ms ⇒ 50 users over ~6s.
+const RAMP = Number(arg('ramp', 120));
 const KEEP = process.argv.includes('--keep');
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const RUN_ID = `${Date.now()}`;
 const PASSWORD = 'LoadTest123!';
 
 const admin = createClient(URL, SERVICE, { auth: { persistSession: false, autoRefreshToken: false } });
 
-const samples = []; // { op, ms, ok }
+const samples = []; // { op, ms, ok, err }
+const errMessages = new Map(); // message -> count
 async function timed(op, fn) {
   const t0 = performance.now();
   let ok = true;
+  let err = null;
   try {
     const res = await fn();
-    if (res?.error) ok = false;
+    if (res?.error) {
+      ok = false;
+      err = res.error.message || String(res.error.status || 'error');
+    }
     return res;
-  } catch {
+  } catch (e) {
     ok = false;
+    err = e?.message || 'threw';
   } finally {
+    if (err) errMessages.set(`${op}: ${err}`, (errMessages.get(`${op}: ${err}`) ?? 0) + 1);
     samples.push({ op, ms: performance.now() - t0, ok });
   }
 }
@@ -103,6 +115,7 @@ async function main() {
   const createdIds = [];
   const wall0 = performance.now();
   await pool([...Array(USERS).keys()], CONCURRENCY, async (i) => {
+    if (RAMP > 0) await sleep(i * RAMP); // realistic staggered arrival
     const email = `loadtest_${RUN_ID}_${i}@example.com`;
     const username = `lt_${RUN_ID}_${i}`.slice(0, 24);
     const { data: created, error } = await admin.auth.admin.createUser({
@@ -151,6 +164,13 @@ async function main() {
       Math.max(...ms, 0).toFixed(0).padStart(7),
     );
   }
+  if (errMessages.size) {
+    console.log(`\n  ── Errors (distinct) ──`);
+    for (const [msg, n] of [...errMessages.entries()].sort((a, b) => b[1] - a[1])) {
+      console.log(`  ${n}×  ${msg}`);
+    }
+  }
+
   const total = samples.length;
   const errors = samples.filter((s) => !s.ok).length;
   const expectedCompletions = USERS * ords.length;

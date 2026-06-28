@@ -88,6 +88,26 @@ deployments. No extra setup. Database migrations are **not** auto-applied — wh
 you add a migration, run it against Supabase yourself (SQL Editor or
 `supabase db push`) as part of releasing that change.
 
+## Load & scale (50 concurrent players)
+
+The quiz scales comfortably to 50 concurrent players: gameplay is server-graded
+RPCs (`get_stage`/`submit_stage`) plus Realtime, all of which the load test
+(`npm run loadtest -- --users 50`) handles at ~100ms p50 with every Realtime
+event delivered.
+
+**The one thing to know:** Supabase rate-limits **auth** endpoints **per IP**.
+
+- For players on **different networks** (the normal case), this never triggers —
+  each is a different IP.
+- For an **event where many players share one network/IP** (e.g. 50 people on the
+  same room WiFi/NAT), a burst of simultaneous logins can hit the limit
+  ("Request rate limit reached"). Mitigate by raising **Authentication → Rate
+  Limits** in the Supabase dashboard before the event, and/or asking players to
+  log in a little staggered. Once signed in, gameplay is unaffected.
+
+> The load test signs in many accounts from a single IP, so it intentionally
+> surfaces this limit — it is a test artifact, not a gameplay bottleneck.
+
 ## Production checklist
 
 - [ ] Env vars set on Vercel (service role marked Secret).
