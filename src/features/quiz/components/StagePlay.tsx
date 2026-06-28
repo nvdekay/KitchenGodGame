@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { motion, useReducedMotion } from 'motion/react';
 import { Button } from '@/components/ui/Button';
+import { LoadingArea } from '@/components/ui/Spinner';
 import { isAppError } from '@/lib/errors';
 import { fireConfetti } from '@/lib/confetti';
 import { useStage, useSubmitStage } from '../hooks/useQuiz';
@@ -37,7 +38,7 @@ export function StagePlay({
   const [shakeKey, setShakeKey] = useState(0);
   const reduced = useReducedMotion();
 
-  if (isLoading) return <p className="mx-auto max-w-xl text-neutral-500">Đang tải…</p>;
+  if (isLoading) return <LoadingArea />;
   if (isError || !stage) {
     return (
       <div className="mx-auto max-w-xl space-y-3">
@@ -51,6 +52,9 @@ export function StagePlay({
 
   const passed = submit.data?.passed ?? false;
   const isLast = ord >= total;
+  const allAnswered =
+    stage.questions.length > 0 &&
+    stage.questions.every((q) => (answers[q.id]?.length ?? 0) > 0);
 
   const onSubmit = () =>
     submit.mutate(
@@ -122,9 +126,14 @@ export function StagePlay({
           )}
         </motion.div>
       ) : (
-        <Button onClick={onSubmit} disabled={submit.isPending || stage.questions.length === 0}>
-          {submit.isPending ? 'Đang nộp…' : 'Nộp bài'}
-        </Button>
+        <div className="space-y-2">
+          <Button onClick={onSubmit} disabled={submit.isPending || !allAnswered}>
+            {submit.isPending ? 'Đang nộp…' : 'Nộp bài'}
+          </Button>
+          {!allAnswered && stage.questions.length > 0 && (
+            <p className="text-xs text-neutral-400">Hãy trả lời tất cả câu hỏi trước khi nộp.</p>
+          )}
+        </div>
       )}
     </div>
   );

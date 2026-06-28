@@ -22,7 +22,7 @@ export function QuizGame({ userId, username }: { userId: string; username: strin
   usePresenceTracker({ userId, username, stage: active });
 
   return (
-    <div className="h-full overflow-auto bg-neutral-50 p-6">
+    <div className="h-full overflow-y-auto overflow-x-hidden bg-neutral-50 p-6">
       <AnimatePresence mode="wait">
         {active === null ? (
           <motion.div

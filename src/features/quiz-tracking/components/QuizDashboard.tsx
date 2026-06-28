@@ -1,6 +1,7 @@
 'use client';
 
 import { cn } from '@/utils/cn';
+import { LoadingArea } from '@/components/ui/Spinner';
 import { useQuizDashboard } from '../hooks/useQuizDashboard';
 
 function formatDuration(ms: number): string {
@@ -14,10 +15,20 @@ function formatDuration(ms: number): string {
 
 /** Admin tracking: live finish-time ranking + a player × stage progress matrix. */
 export function QuizDashboard() {
-  const { data, isLoading } = useQuizDashboard();
+  const { data, isLoading, isError, refetch } = useQuizDashboard();
 
-  if (isLoading) return <p className="text-neutral-500">Đang tải…</p>;
-  const d = data!;
+  if (isLoading) return <LoadingArea />;
+  if (isError || !data) {
+    return (
+      <div className="space-y-3">
+        <p className="text-red-600">Không tải được dữ liệu theo dõi.</p>
+        <button onClick={() => refetch()} className="text-sm font-medium text-brand">
+          Thử lại
+        </button>
+      </div>
+    );
+  }
+  const d = data;
   const medal = ['🥇', '🥈', '🥉'];
 
   return (

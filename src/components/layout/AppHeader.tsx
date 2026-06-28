@@ -53,8 +53,9 @@ export function AppHeader() {
       <div className="flex items-center gap-3">
         {status === 'loading' ? null : isAuthenticated ? (
           <>
-            <span className="text-sm text-neutral-700">
-              👤 <span className="font-medium">{user?.username}</span>
+            <span className="flex max-w-[40vw] items-center gap-1 text-sm text-neutral-700 sm:max-w-none">
+              <span aria-hidden>👤</span>
+              <span className="truncate font-medium">{user?.username}</span>
             </span>
             <Button
               variant="secondary"

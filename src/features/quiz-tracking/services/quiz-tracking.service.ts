@@ -24,11 +24,16 @@ export interface DashboardData {
 }
 
 export async function getQuizDashboard(db: TypedSupabaseClient): Promise<DashboardData> {
-  const stages = (await db.from('stages').select('ord').order('ord')).data ?? [];
-  const profiles = (await db.from('profiles').select('id,username')).data ?? [];
-  const runs = (await db.from('quiz_runs').select('user_id,started_at,finished_at')).data ?? [];
-  const comps =
-    (await db.from('stage_completions').select('user_id,stage_ord,completed_at')).data ?? [];
+  // Run the four reads concurrently (each wrapped so Promise.all sees a clean
+  // array): one round-trip of latency instead of four.
+  const [stages, profiles, runs, comps] = await Promise.all([
+    (async () => (await db.from('stages').select('ord').order('ord')).data ?? [])(),
+    (async () => (await db.from('profiles').select('id,username')).data ?? [])(),
+    (async () =>
+      (await db.from('quiz_runs').select('user_id,started_at,finished_at')).data ?? [])(),
+    (async () =>
+      (await db.from('stage_completions').select('user_id,stage_ord,completed_at')).data ?? [])(),
+  ]);
 
   const stageOrds = stages.map((s) => s.ord);
   const nameOf = new Map(profiles.map((p) => [p.id, p.username]));

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/Button';
+import { LoadingArea } from '@/components/ui/Spinner';
 import { isAppError } from '@/lib/errors';
 import { useQuizAdmin, type QuizAdmin } from '../hooks/useQuizAdmin';
 import type { AdminQuestion, AdminStage } from '../services/quiz-admin.service';
@@ -19,7 +20,7 @@ export function QuizManager() {
   const admin = useQuizAdmin();
   const [addingStage, setAddingStage] = useState(false);
 
-  if (admin.query.isLoading) return <p className="text-neutral-500">Đang tải…</p>;
+  if (admin.query.isLoading) return <LoadingArea />;
   const stages = admin.query.data ?? [];
 
   const err =

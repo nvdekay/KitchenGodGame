@@ -2,6 +2,7 @@
 
 import { motion } from 'motion/react';
 import { Button } from '@/components/ui/Button';
+import { LoadingArea } from '@/components/ui/Spinner';
 import { cn } from '@/utils/cn';
 import type { StageStatus } from '../types';
 
@@ -19,7 +20,7 @@ export function StageSelect({
   loading: boolean;
   onPlay: (ord: number) => void;
 }) {
-  if (loading) return <p className="text-neutral-500">Đang tải…</p>;
+  if (loading) return <LoadingArea />;
 
   const doneCount = stages.filter((s) => s.completed).length;
   const allDone = stages.length > 0 && doneCount === stages.length;

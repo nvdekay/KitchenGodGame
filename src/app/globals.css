@@ -10,3 +10,35 @@ body {
 body {
   @apply bg-neutral-50 text-neutral-900 antialiased;
 }
+
+@layer base {
+  /* Consistent, accessible focus ring for text inputs and selects across all
+     forms (login, signup, admin) without touching each one. */
+  input[type='text'],
+  input[type='email'],
+  input[type='password'],
+  input[type='number'],
+  select,
+  textarea {
+    @apply outline-none transition-colors;
+  }
+  input[type='text']:focus-visible,
+  input[type='email']:focus-visible,
+  input[type='password']:focus-visible,
+  input[type='number']:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible {
+    @apply border-brand ring-2 ring-brand/30;
+  }
+}
+
+/* Respect users who prefer less motion (belt-and-suspenders with MotionConfig). */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
