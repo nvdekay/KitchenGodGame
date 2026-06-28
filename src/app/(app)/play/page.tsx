@@ -1,13 +1,13 @@
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
-import { getAuthUser } from '@/services/profile.service';
-import { getMyProgress, PlayClient } from '@/features/progress';
+import { QuizGame } from '@/features/quiz';
 
 /**
- * Play route — protected by middleware. Server component: it resolves the player
- * identity + their saved progress, then hands them to the client PlayClient
- * (which mounts the Phaser canvas and tracks progress). The game itself loads
- * client-side only.
+ * Play route — protected by middleware. The quiz is the real game now: a server
+ * component resolves the signed-in user, then hands their id to the client
+ * QuizGame (stage select → play → server-graded submit → unlock next).
+ *
+ * (The Phaser arcade demo still lives at /sandbox.)
  */
 export default async function PlayPage() {
   const supabase = await createClient();
@@ -16,18 +16,9 @@ export default async function PlayPage() {
   } = await supabase.auth.getUser();
   if (!user) redirect('/login?redirectTo=/play');
 
-  const [authUser, progress] = await Promise.all([
-    getAuthUser(supabase, { id: user.id, email: user.email ?? null }),
-    getMyProgress(supabase, user.id),
-  ]);
-
   return (
-    <main className="h-full w-full bg-neutral-900">
-      <PlayClient
-        userId={user.id}
-        username={authUser?.username ?? 'Player'}
-        bestLevel={progress.bestLevel}
-      />
+    <main className="h-full w-full">
+      <QuizGame userId={user.id} />
     </main>
   );
 }
