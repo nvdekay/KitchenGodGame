@@ -3,11 +3,11 @@
 import { useState } from 'react';
 import { motion, useReducedMotion } from 'motion/react';
 import { Button } from '@/components/ui/Button';
-import { LoadingArea } from '@/components/ui/Spinner';
 import { isAppError } from '@/lib/errors';
 import { fireConfetti } from '@/lib/confetti';
 import { useStage, useSubmitStage } from '../hooks/useQuiz';
 import { QuestionCard } from './QuestionCard';
+import { StagePlaySkeleton } from './QuizSkeletons';
 import type { AnswerMap } from '../types';
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.07 } } };
@@ -38,7 +38,7 @@ export function StagePlay({
   const [shakeKey, setShakeKey] = useState(0);
   const reduced = useReducedMotion();
 
-  if (isLoading) return <LoadingArea />;
+  if (isLoading) return <StagePlaySkeleton />;
   if (isError || !stage) {
     return (
       <div className="mx-auto max-w-xl space-y-3">

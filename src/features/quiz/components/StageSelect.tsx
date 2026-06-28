@@ -2,8 +2,8 @@
 
 import { motion } from 'motion/react';
 import { Button } from '@/components/ui/Button';
-import { LoadingArea } from '@/components/ui/Spinner';
 import { cn } from '@/utils/cn';
+import { StageSelectSkeleton } from './QuizSkeletons';
 import type { StageStatus } from '../types';
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.06 } } };
@@ -20,7 +20,7 @@ export function StageSelect({
   loading: boolean;
   onPlay: (ord: number) => void;
 }) {
-  if (loading) return <LoadingArea />;
+  if (loading) return <StageSelectSkeleton />;
 
   const doneCount = stages.filter((s) => s.completed).length;
   const allDone = stages.length > 0 && doneCount === stages.length;

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/Button';
-import { LoadingArea } from '@/components/ui/Spinner';
+import { Skeleton } from '@/components/ui/Skeleton';
 import { isAppError } from '@/lib/errors';
 import { useQuizAdmin, type QuizAdmin } from '../hooks/useQuizAdmin';
 import type { AdminQuestion, AdminStage } from '../services/quiz-admin.service';
@@ -20,7 +20,16 @@ export function QuizManager() {
   const admin = useQuizAdmin();
   const [addingStage, setAddingStage] = useState(false);
 
-  if (admin.query.isLoading) return <LoadingArea />;
+  if (admin.query.isLoading) {
+    return (
+      <div className="space-y-4">
+        <Skeleton className="h-8 w-48" />
+        {Array.from({ length: 3 }).map((_, i) => (
+          <Skeleton key={i} className="h-28 w-full rounded-lg" />
+        ))}
+      </div>
+    );
+  }
   const stages = admin.query.data ?? [];
 
   const err =

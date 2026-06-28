@@ -1,8 +1,8 @@
 'use client';
 
 import { cn } from '@/utils/cn';
-import { LoadingArea } from '@/components/ui/Spinner';
 import { useQuizDashboard } from '../hooks/useQuizDashboard';
+import { DashboardSkeleton } from './DashboardSkeleton';
 
 function formatDuration(ms: number): string {
   const totalSec = Math.floor(ms / 1000);
@@ -17,7 +17,7 @@ function formatDuration(ms: number): string {
 export function QuizDashboard() {
   const { data, isLoading, isError, refetch } = useQuizDashboard();
 
-  if (isLoading) return <LoadingArea />;
+  if (isLoading) return <DashboardSkeleton />;
   if (isError || !data) {
     return (
       <div className="space-y-3">
