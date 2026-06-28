@@ -12,7 +12,7 @@ import { cn } from '@/utils/cn';
 const NAV_ITEMS = [
   { href: '/admin', label: 'Tổng quan' },
   { href: '/admin/quiz', label: 'Câu hỏi' },
-  { href: '/admin/users', label: 'Người chơi' },
+  { href: '/admin/users', label: 'Theo dõi' },
   // { href: '/admin/analytics', label: 'Analytics' },   // future
 ] as const;
 
