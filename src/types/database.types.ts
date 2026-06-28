@@ -14,6 +14,8 @@ export type Json = string | number | boolean | null | { [key: string]: Json | un
 
 export type AppRole = 'player' | 'admin';
 
+export type QuestionType = 'single' | 'multiple' | 'boolean';
+
 export interface Database {
   // Marker the Supabase client uses to resolve schema types. The CLI emits this
   // in generated types; we include it so the hand-written placeholder behaves
@@ -77,6 +79,67 @@ export interface Database {
         };
         Relationships: [];
       };
+      stages: {
+        Row: { id: string; ord: number; title: string; description: string | null; created_at: string };
+        Insert: { id?: string; ord: number; title: string; description?: string | null; created_at?: string };
+        Update: { ord?: number; title?: string; description?: string | null };
+        Relationships: [];
+      };
+      questions: {
+        Row: {
+          id: string;
+          stage_id: string;
+          ord: number;
+          type: QuestionType;
+          prompt: string;
+          options: Json;
+          correct_indices: number[];
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          stage_id: string;
+          ord: number;
+          type?: QuestionType;
+          prompt: string;
+          options?: Json;
+          correct_indices?: number[];
+          created_at?: string;
+        };
+        Update: {
+          stage_id?: string;
+          ord?: number;
+          type?: QuestionType;
+          prompt?: string;
+          options?: Json;
+          correct_indices?: number[];
+        };
+        Relationships: [];
+      };
+      quiz_runs: {
+        Row: { user_id: string; started_at: string | null; finished_at: string | null; updated_at: string };
+        Insert: { user_id: string; started_at?: string | null; finished_at?: string | null; updated_at?: string };
+        Update: { started_at?: string | null; finished_at?: string | null; updated_at?: string };
+        Relationships: [];
+      };
+      stage_completions: {
+        Row: {
+          user_id: string;
+          stage_ord: number;
+          completed_at: string;
+          correct_count: number;
+          total: number;
+        };
+        Insert: {
+          user_id: string;
+          stage_ord: number;
+          completed_at?: string;
+          correct_count?: number;
+          total?: number;
+        };
+        Update: { completed_at?: string; correct_count?: number; total?: number };
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: {
@@ -96,8 +159,16 @@ export interface Database {
         Args: { p_limit?: number };
         Returns: { username: string; best_level: number; best_score: number }[];
       };
+      get_stage: {
+        Args: { p_ord: number };
+        Returns: Json;
+      };
+      submit_stage: {
+        Args: { p_ord: number; p_answers: Json };
+        Returns: Json;
+      };
     };
-    Enums: { app_role: AppRole };
+    Enums: { app_role: AppRole; question_type: QuestionType };
     CompositeTypes: Record<string, never>;
   };
 }
