@@ -1,68 +1,42 @@
 # KitchenGodGame
 
-A **foundation** for a browser-based game platform. The gameplay is intentionally
-a placeholder — this repo is the extensible, modular architecture that future
-game concepts (challenges, quests, stages, leaderboards, …) plug into without a
-rewrite.
+A web **quiz game**: 5 stages of mixed-type questions (single / multiple /
+true-false), each unlocking the next, with server-side grading, smooth
+animations, an admin question editor, and a live admin dashboard that tracks who
+has cleared which stage and who finished all stages fastest.
 
-> Tech: Next.js 15 (App Router) · TypeScript (strict) · TailwindCSS · Phaser 3 ·
-> Supabase (Auth · Postgres · Realtime) · Zustand · React Query · Zod · React
-> Hook Form. Deploys to Vercel + Supabase.
+> Tech: Next.js 15 (App Router) · TypeScript (strict) · TailwindCSS · Supabase
+> (Auth · Postgres + RLS · Realtime) · Zustand · React Query · Zod · React Hook
+> Form · Framer Motion. Deploys to Vercel + Supabase.
 
 ## Requirements
 
 - **Node.js ≥ 20** (`node -v`)
 - **npm** (ships with Node)
-- A **Supabase** project — only needed for auth, `/play`, and `/admin`
-  (free tier is fine; the engine preview below works without it)
+- A **Supabase** project (free tier is fine) for auth + database + realtime
 
 ---
 
-## Run it — two ways
-
-### A) Preview the game engine in ~1 minute (no Supabase)
-
-This boots the app and shows the **Phaser canvas** (Boot → Loading → Main scene)
-using placeholder env values. Auth-gated pages won't work yet — that's expected.
+## Run it
 
 ```bash
-# 1. create a local env file (placeholder values are fine for the preview)
-cp .env.example .env.local
-
-# 2. install dependencies
-npm install
-
-# 3. start the dev server
-npm run dev
-```
-
-Then open:
-
-- **http://localhost:3000** — landing page
-- **http://localhost:3000/sandbox** — 👈 **the game engine running** (dev-only route, no login)
-
-> `/sandbox` exists so you can see the engine before configuring a backend. It
-> 404s in production. The real, auth-protected entry point is `/play`.
-
-### B) Full setup with auth + database (≈ 5–10 minutes)
-
-To use login, `/play`, and the `/admin` dashboard you need a Supabase project.
-
-```bash
-# 1. env: paste your real Supabase values into .env.local
+# 1. env: paste your Supabase values into .env.local
 cp .env.example .env.local        # then edit the file (see table below)
 
 # 2. install
 npm install
 
-# 3. database: link your project and apply the foundation migration
+# 3. database: apply migrations (SQL Editor, or the CLI below)
 npx supabase link --project-ref <your-project-ref>
-npm run db:push                   # creates profiles, user_roles, RLS, triggers
+npm run db:push                   # applies supabase/migrations/*
 npm run db:types                  # regenerate typed DB schema
 
 # 4. run
 npm run dev
 ```
+
+> No CLI? Just paste each file in `supabase/migrations/` (0001 → 0005) into the
+> Supabase **SQL Editor** in order and run them.
 
 **`.env.local` values** (from Supabase → Project Settings → API):
 
@@ -90,23 +64,26 @@ Full details & troubleshooting: [`docs/03-local-development.md`](docs/03-local-d
 
 ## Routes
 
-| Route       | Access            | What it is                                  |
-| ----------- | ----------------- | ------------------------------------------- |
-| `/`         | public            | Landing page                                |
-| `/sandbox`  | public (dev only) | Engine preview — Phaser canvas, no login    |
-| `/login`    | public            | Sign in / sign up                           |
-| `/play`     | authenticated     | The game (real entry point)                 |
-| `/admin`    | admin role        | Admin dashboard scaffold                    |
+| Route          | Access         | What it is                                       |
+| -------------- | -------------- | ------------------------------------------------ |
+| `/`            | public         | Landing page                                     |
+| `/login`       | public         | Sign in (username or email)                      |
+| `/signup`      | public         | Register (email + username + password)           |
+| `/play`        | authenticated  | The quiz — stage select → play → submit          |
+| `/admin`       | admin role     | Overview (who's online)                          |
+| `/admin/quiz`  | admin role     | Manage stages & questions (CRUD)                 |
+| `/admin/users` | admin role     | Live tracking: progress matrix + finish ranking  |
 
-## What's here (and what's deliberately NOT)
+## Features
 
-✅ Provided: project structure, Phaser↔React integration, Supabase wiring, auth
-foundation (player/admin), admin scaffolding, typed event bus, Zustand stores,
-service layer, env validation, error + logging strategy, realtime foundation,
-foundation DB migration, and a copyable feature template.
-
-🚫 Not built (by design): actual gameplay, quests, stages, challenges, inventory,
-NPCs, combat, multiplayer. These are **extension points**, not implementations.
+- Auth: register, login by **username or email**, logout, role-based access.
+- Quiz: 5 stages, mixed question types (single / multiple / true-false), each
+  stage unlocks the next, **graded on the server** (answers never reach the
+  browser), unlimited retries.
+- Animations: Framer Motion transitions + confetti (pure web; respects
+  reduced-motion).
+- Admin: question/stage editor; **realtime** dashboard tracking who cleared which
+  stage and who finished all stages fastest; live online presence.
 
 ## Documentation
 
@@ -116,7 +93,6 @@ NPCs, combat, multiplayer. These are **extension points**, not implementations.
 | 2   | [Folder Structure Guide](docs/02-folder-structure.md)         |
 | 3   | [Local Development Guide](docs/03-local-development.md)        |
 | 4   | [Supabase Setup Guide](docs/04-supabase-setup.md)             |
-| 5   | [Phaser Integration Guide](docs/05-phaser-integration.md)     |
 | 6   | [Future Expansion Guide](docs/06-future-expansion.md)         |
 | 7   | [Deployment Guide (Vercel + Supabase)](docs/07-deployment.md) |
 

@@ -49,9 +49,9 @@ npm run dev              # http://localhost:3000
 Routes to try:
 
 - `/` landing
-- `/login` auth form
-- `/play` the Phaser game (requires login → middleware redirects)
-- `/admin` admin scaffold (requires `admin` role → see setup guide to grant)
+- `/login` · `/signup` auth forms
+- `/play` the quiz (requires login → middleware redirects)
+- `/admin`, `/admin/quiz`, `/admin/users` admin area (require `admin` role)
 
 ## Everyday commands
 
@@ -86,8 +86,6 @@ npm run typecheck && npm run lint && npm run build
 
 - **"Invalid public environment variables" at boot** → a `NEXT_PUBLIC_*` is
   missing in `.env.local`.
-- **Phaser errors on the server / hydration mismatch** → something imported
-  `game/` outside `GameCanvas`. Only mount the game via `GameCanvas` (`ssr:false`).
 - **Redirected to `/login` on `/play`** → expected when signed out (middleware).
 - **`/admin` bounces to `/play`** → your user isn't `admin`; grant the role
   (setup guide).

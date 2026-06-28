@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
+import { usePresenceTracker } from '@/features/presence';
 import { useStageStatuses } from '../hooks/useQuiz';
 import { StageSelect } from './StageSelect';
 import { StagePlay } from './StagePlay';
@@ -12,10 +13,13 @@ import { StagePlay } from './StagePlay';
  * pass). AnimatePresence cross-fades between the select screen and a stage, and
  * keys each stage so answer/submit state resets between stages.
  */
-export function QuizGame({ userId }: { userId: string }) {
+export function QuizGame({ userId, username }: { userId: string; username: string }) {
   const [active, setActive] = useState<number | null>(null);
   const { data: stages, isLoading } = useStageStatuses(userId);
   const total = stages?.length ?? 0;
+
+  // Publish live presence (online + current stage) for the admin dashboard.
+  usePresenceTracker({ userId, username, stage: active });
 
   return (
     <div className="h-full overflow-auto bg-neutral-50 p-6">

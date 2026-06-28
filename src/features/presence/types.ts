@@ -2,18 +2,15 @@
 export interface OnlinePlayer {
   userId: string;
   username: string;
-  /** Current gameplay level. */
-  level: number;
-  /** Active Phaser scene key (e.g. 'GameScene' | 'MenuScene') or null. */
-  scene: string | null;
+  /** Quiz stage the player currently has open, or null if on the stage list. */
+  stage: number | null;
 }
 
 /** Shape of the presence payload each player tracks on the channel. */
 export interface PresenceMeta {
   user_id: string;
   username: string;
-  level: number;
-  scene: string | null;
+  stage: number | null;
 }
 
 /** Shared channel name for the online-players presence channel. */

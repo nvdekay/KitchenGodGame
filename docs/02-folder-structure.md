@@ -13,7 +13,6 @@ KitchenGodGame/
     ├── app/                 # Next.js App Router — routes only
     ├── components/          # shared, dumb UI
     ├── features/            # vertical product slices  ← the core
-    ├── game/                # Phaser, isolated from React
     ├── hooks/               # shared React hooks
     ├── lib/                 # cross-cutting primitives
     ├── providers/           # root context providers
@@ -50,14 +49,6 @@ KitchenGodGame/
 - See [`src/features/README.md`](../src/features/README.md). `_template/` is a
   copyable skeleton.
 
-### `src/game/` — Phaser runtime
-
-- **Why:** keep the game engine fully isolated and client-only.
-- **Belongs:** `scenes/`, `GameManager`, `SceneManager`, `config`, `events/`,
-  `react/` (the bridge + mount). Public API via `index.ts`.
-- **Never:** import React inside scenes; import scenes into React; import this
-  module from server components (only `GameCanvas`, which is `ssr:false`).
-
 ### `src/hooks/` — Shared hooks
 
 - **Why:** reusable React behaviour used by many features (e.g.
@@ -88,8 +79,8 @@ KitchenGodGame/
 ### `src/stores/` — Client state (Zustand)
 
 - **Why:** synchronous client-only state many components read.
-- **Belongs:** `authStore`, `uiStore`, `gameStore`.
-- **Never:** server data (React Query owns it), gameplay simulation, form state.
+- **Belongs:** `authStore`, `uiStore`.
+- **Never:** server data (React Query owns it), form state (React Hook Form).
 
 ### `src/types/` — Shared & generated types
 

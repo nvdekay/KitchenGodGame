@@ -21,10 +21,6 @@ export const AppEvents = {
   USER_LOGIN: 'USER_LOGIN',
   USER_LOGOUT: 'USER_LOGOUT',
   SESSION_REFRESHED: 'SESSION_REFRESHED',
-  // Game lifecycle (app-side view of game state — emitted by the bridge)
-  GAME_READY: 'GAME_READY',
-  SCENE_LOADED: 'SCENE_LOADED',
-  LEVEL_COMPLETED: 'LEVEL_COMPLETED',
   // Realtime
   REALTIME_CONNECTED: 'REALTIME_CONNECTED',
   REALTIME_DISCONNECTED: 'REALTIME_DISCONNECTED',
@@ -41,9 +37,6 @@ export interface AppEventMap {
   USER_LOGIN: { userId: string };
   USER_LOGOUT: { userId: string | null };
   SESSION_REFRESHED: { userId: string };
-  GAME_READY: { sceneKey: string };
-  SCENE_LOADED: { sceneKey: string };
-  LEVEL_COMPLETED: { level: number; score: number };
   REALTIME_CONNECTED: { channel: string };
   REALTIME_DISCONNECTED: { channel: string };
 }

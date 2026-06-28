@@ -12,10 +12,7 @@ import { cn } from '@/utils/cn';
  * components/layout because it is app-chrome reused across authenticated pages;
  * it consumes the auth feature's public API for identity + sign-out.
  */
-const NAV = [
-  { href: '/play', label: 'Chơi' },
-  { href: '/leaderboard', label: 'Bảng xếp hạng' },
-] as const;
+const NAV = [{ href: '/play', label: 'Chơi' }] as const;
 
 export function AppHeader() {
   const pathname = usePathname();

@@ -2,8 +2,8 @@ import { create } from 'zustand';
 
 /**
  * UIStore — ephemeral, app-wide UI state that many unrelated components need:
- * theme, global modal, sidebar, toast queue. NOT for server data, NOT for form
- * state (use React Hook Form), NOT for game state (use gameStore).
+ * theme, global modal, sidebar, toast queue. NOT for server data (use React
+ * Query) and NOT for form state (use React Hook Form).
  */
 
 type Theme = 'light' | 'dark';

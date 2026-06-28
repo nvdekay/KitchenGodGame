@@ -25,15 +25,10 @@ export function useOnlinePlayers(): OnlinePlayer[] {
       for (const metas of Object.values(state)) {
         const meta = metas.at(-1); // latest meta for this presence key
         if (meta) {
-          list.push({
-            userId: meta.user_id,
-            username: meta.username,
-            level: meta.level,
-            scene: meta.scene,
-          });
+          list.push({ userId: meta.user_id, username: meta.username, stage: meta.stage });
         }
       }
-      list.sort((a, b) => b.level - a.level || a.username.localeCompare(b.username));
+      list.sort((a, b) => (b.stage ?? 0) - (a.stage ?? 0) || a.username.localeCompare(b.username));
       setPlayers(list);
     };
 

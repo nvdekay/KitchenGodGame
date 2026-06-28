@@ -24,7 +24,7 @@ export function OnlinePlayers() {
             <li key={p.userId} className="flex items-center justify-between py-1.5">
               <span className="font-medium">{p.username}</span>
               <span className="text-neutral-600">
-                {p.scene === 'GameScene' ? `Đang chơi · Màn ${p.level}` : 'Trong menu'}
+                {p.stage !== null ? `Đang làm · Chặng ${p.stage}` : 'Đang chọn chặng'}
               </span>
             </li>
           ))}
