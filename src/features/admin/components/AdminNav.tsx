@@ -10,10 +10,10 @@ import { cn } from '@/utils/cn';
  * so adding "Analytics" or "Content" later is a one-line change.
  */
 const NAV_ITEMS = [
-  { href: '/admin', label: 'Overview' },
-  { href: '/admin/users', label: 'Users' },
+  { href: '/admin', label: 'Tổng quan' },
+  { href: '/admin/quiz', label: 'Câu hỏi' },
+  { href: '/admin/users', label: 'Người chơi' },
   // { href: '/admin/analytics', label: 'Analytics' },   // future
-  // { href: '/admin/challenges', label: 'Challenges' }, // future
 ] as const;
 
 export function AdminNav() {
