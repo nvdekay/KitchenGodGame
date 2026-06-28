@@ -118,6 +118,7 @@ NPCs, combat, multiplayer. These are **extension points**, not implementations.
 | 4   | [Supabase Setup Guide](docs/04-supabase-setup.md)             |
 | 5   | [Phaser Integration Guide](docs/05-phaser-integration.md)     |
 | 6   | [Future Expansion Guide](docs/06-future-expansion.md)         |
+| 7   | [Deployment Guide (Vercel + Supabase)](docs/07-deployment.md) |
 
 ## Top-level scripts
 
