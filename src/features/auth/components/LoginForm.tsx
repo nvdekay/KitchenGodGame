@@ -12,8 +12,14 @@ import { isAppError } from '@/lib/errors';
  * Sign-in form. The single identifier field accepts an email OR a username; the
  * auth service resolves a username to its email before calling Supabase.
  */
-export function LoginForm({ justRegistered = false }: { justRegistered?: boolean }) {
-  const signIn = useSignIn();
+export function LoginForm({
+  justRegistered = false,
+  redirectTo = '/map',
+}: {
+  justRegistered?: boolean;
+  redirectTo?: string;
+}) {
+  const signIn = useSignIn(redirectTo);
   const {
     register,
     handleSubmit,
@@ -38,7 +44,7 @@ export function LoginForm({ justRegistered = false }: { justRegistered?: boolean
           id="identifier"
           type="text"
           autoComplete="username"
-          className="rounded border px-3 py-2"
+          className="rounded-lg border border-sky-200 bg-white px-3 py-2.5 outline-none transition focus:border-sky-400 focus:ring-2 focus:ring-sky-200"
           {...register('identifier')}
         />
         {errors.identifier && (
@@ -54,7 +60,7 @@ export function LoginForm({ justRegistered = false }: { justRegistered?: boolean
           id="password"
           type="password"
           autoComplete="current-password"
-          className="rounded border px-3 py-2"
+          className="rounded-lg border border-sky-200 bg-white px-3 py-2.5 outline-none transition focus:border-sky-400 focus:ring-2 focus:ring-sky-200"
           {...register('password')}
         />
         {errors.password && <p className="text-sm text-red-600">{errors.password.message}</p>}

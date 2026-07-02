@@ -1,19 +1,24 @@
 import { LoginForm } from '@/features/auth';
 
-/** Login route. Reads `?registered=1` (set after signup) on the server and
- *  passes it down, so the form can show a success banner without useSearchParams.
- *  Route protection (redirect when already signed in) is handled by middleware. */
+/** Login route. Reads `?registered=1` (set after signup) and `?redirectTo=` (set
+ *  by middleware when it bounces an anonymous visitor) on the server and passes
+ *  them down — so after signing in the player returns to where they were headed
+ *  (default: /map). Route protection is handled by middleware. */
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ registered?: string }>;
+  searchParams: Promise<{ registered?: string; redirectTo?: string }>;
 }) {
-  const { registered } = await searchParams;
+  const { registered, redirectTo } = await searchParams;
+
+  // Only accept internal, single-slash paths — never an absolute/external URL.
+  const safeRedirect =
+    redirectTo && redirectTo.startsWith('/') && !redirectTo.startsWith('//') ? redirectTo : '/map';
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center gap-8 p-8">
-      <h1 className="text-2xl font-bold">Đăng nhập</h1>
-      <LoginForm justRegistered={registered === '1'} />
-    </main>
+    <>
+      <h1 className="mb-5 text-center text-2xl font-extrabold text-sky-900">Đăng nhập</h1>
+      <LoginForm justRegistered={registered === '1'} redirectTo={safeRedirect} />
+    </>
   );
 }

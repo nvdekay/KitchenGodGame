@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { motion, useReducedMotion } from 'motion/react';
+import { motion } from 'motion/react';
 
 /**
  * Landing splash — "Các Táo Lên Chầu".
@@ -22,8 +22,9 @@ import { motion, useReducedMotion } from 'motion/react';
  *     the button beneath, so nothing is cramped or clipped.
  *
  * Each Táo bounces on a staggered loop; the scroll sways; "BẮT ĐẦU" pulses and
- * links to /play (middleware redirects anonymous visitors to /login first).
- * All looping motion is disabled under prefers-reduced-motion.
+ * links to /map (middleware redirects anonymous visitors to /login first).
+ * The idle loops always run (they're core to the game splash) — they are not
+ * gated behind prefers-reduced-motion.
  */
 
 // Position classes carry the portrait (base) layout plus a `landscape:` override.
@@ -58,16 +59,11 @@ const TAO = [
 const TAO_SHADOW = 'drop-shadow-[0_12px_14px_rgba(0,70,140,0.28)]';
 
 export function HomeSplash() {
-  const reduce = useReducedMotion();
-
   // Idle bounce for a Táo: hop up ~7% of its own height on a gentle loop.
-  const bounce = (delay: number) =>
-    reduce
-      ? {}
-      : {
-          animate: { y: ['0%', '-7%', '0%'] },
-          transition: { duration: 1.5, repeat: Infinity, ease: 'easeInOut' as const, delay },
-        };
+  const bounce = (delay: number) => ({
+    animate: { y: ['0%', '-7%', '0%'] },
+    transition: { duration: 1.5, repeat: Infinity, ease: 'easeInOut' as const, delay },
+  });
 
   return (
     <main className="relative h-[100dvh] w-screen overflow-hidden bg-[#4aa8ff]">
@@ -89,12 +85,8 @@ export function HomeSplash() {
             src="/home/cactaolentrau.webp"
             alt="Các Táo Lên Chầu"
             className="h-auto w-full drop-shadow-[0_10px_18px_rgba(0,60,120,0.30)]"
-            {...(reduce
-              ? {}
-              : {
-                  animate: { y: ['0%', '-2.5%', '0%'] },
-                  transition: { duration: 4, repeat: Infinity, ease: 'easeInOut' },
-                })}
+            animate={{ y: ['0%', '-2.5%', '0%'] }}
+            transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
           />
         </div>
 
@@ -116,19 +108,15 @@ export function HomeSplash() {
 
         {/* Start button → /play */}
         <div className="absolute left-1/2 top-[85%] w-[44%] -translate-x-1/2 -translate-y-1/2 landscape:top-[83%] landscape:w-[21%]">
-          <Link href="/play" aria-label="Bắt đầu chơi" className="block outline-none">
+          <Link href="/map" aria-label="Bắt đầu chơi" className="block outline-none">
             <motion.img
               src="/home/startbutton.webp"
               alt="Bắt đầu"
               className="h-auto w-full cursor-pointer drop-shadow-[0_8px_12px_rgba(0,60,120,0.35)]"
               whileHover={{ scale: 1.08 }}
               whileTap={{ scale: 0.94 }}
-              {...(reduce
-                ? {}
-                : {
-                    animate: { scale: [1, 1.04, 1] },
-                    transition: { duration: 1.6, repeat: Infinity, ease: 'easeInOut' },
-                  })}
+              animate={{ scale: [1, 1.04, 1] }}
+              transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}
             />
           </Link>
         </div>

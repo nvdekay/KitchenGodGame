@@ -23,7 +23,7 @@ export function useAuth() {
   return { user, status, isAuthenticated, isAdmin };
 }
 
-export function useSignIn() {
+export function useSignIn(redirectTo: string = '/map') {
   const setUser = useAuthStore((s) => s.setUser);
   const router = useRouter();
   const qc = useQueryClient();
@@ -33,7 +33,7 @@ export function useSignIn() {
     onSuccess: (user) => {
       setUser(user);
       qc.invalidateQueries();
-      router.push('/play');
+      router.push(redirectTo);
     },
   });
 }

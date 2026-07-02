@@ -1,0 +1,149 @@
+'use client';
+
+import Image from 'next/image';
+import Link from 'next/link';
+import { motion } from 'motion/react';
+import { Spinner } from '@/components/ui/Spinner';
+import { cn } from '@/utils/cn';
+import type { StageStatus } from '@/features/quiz';
+
+/**
+ * Presentational stage-select map (no data fetching — see GameMap for that).
+ *
+ * Reuses the sky background and composites up to three stages (the Táo from
+ * /public/home) over it, each with a padlock badge:
+ *   • completed stage → open padlock (unlock.webp)
+ *   • not-yet-cleared → closed padlock (lock.webp)
+ * Golden arrows (map/left|right.webp) fan out from the centre stage toward the
+ * two side stages. Only *unlocked* stages are interactive; locked ones are
+ * dimmed and can't be entered. Layout switches between a landscape row and a
+ * portrait column purely via CSS orientation variants.
+ */
+
+// Per-stage art + position. `cls` = portrait (base) layout + `landscape:` override.
+const STAGE_LAYOUT: Record<number, { tao: string; cls: string; delay: number }> = {
+  1: {
+    tao: '/home/taodo.webp',
+    cls: 'left-1/2 top-[20%] w-[27%] landscape:left-[18%] landscape:top-[60%] landscape:w-[15%]',
+    delay: 0,
+  },
+  2: {
+    tao: '/home/taocam.webp',
+    cls: 'left-1/2 top-[50%] w-[27%] landscape:left-1/2 landscape:top-[60%] landscape:w-[15%]',
+    delay: 0.15,
+  },
+  3: {
+    tao: '/home/taoxanhla.webp',
+    cls: 'left-1/2 top-[80%] w-[27%] landscape:left-[82%] landscape:top-[60%] landscape:w-[15%]',
+    delay: 0.3,
+  },
+};
+
+// Directional arrows (landscape only) — both point right, showing the forward
+// progression 1 → 2 → 3 (one between each pair of stages).
+const ARROWS = [
+  { src: '/map/right.webp', cls: 'left-[34%] top-[57%] w-[13%]', x: [-3, 5], delay: 0 },
+  { src: '/map/right.webp', cls: 'left-[66%] top-[57%] w-[13%]', x: [-3, 5], delay: 0.4 },
+] as const;
+
+export function MapView({
+  stages,
+  loading = false,
+  onSelect,
+}: {
+  stages: StageStatus[];
+  loading?: boolean;
+  onSelect: (ord: number) => void;
+}) {
+  const mapStages = stages.filter((s) => s.ord <= 3).sort((a, b) => a.ord - b.ord);
+
+  return (
+    <main className="relative h-[100dvh] w-screen overflow-hidden bg-[#4aa8ff]">
+      <Image src="/home/background.webp" alt="" fill priority sizes="100vw" className="object-cover" />
+
+      {/* Back to landing */}
+      <Link
+        href="/"
+        className="absolute left-4 top-4 z-20 rounded-full bg-white/80 px-4 py-2 text-sm font-semibold text-sky-700 shadow-md backdrop-blur transition hover:bg-white"
+      >
+        ← Trang chủ
+      </Link>
+
+      {loading && (
+        <div className="absolute inset-0 z-10 flex items-center justify-center">
+          <Spinner />
+        </div>
+      )}
+
+      {/* Centred, viewport-fitted stage — 9:16 portrait, 16:9 landscape */}
+      <div className="absolute left-1/2 top-1/2 aspect-[9/16] w-[min(100vw,calc(100dvh*9/16))] -translate-x-1/2 -translate-y-1/2 landscape:aspect-[16/9] landscape:w-[min(100vw,calc(100dvh*16/9))]">
+        {/* Directional arrows (landscape only) */}
+        {!loading &&
+          mapStages.length > 0 &&
+          ARROWS.map((a) => (
+            <div
+              key={a.src}
+              className={cn('absolute hidden -translate-x-1/2 -translate-y-1/2 landscape:block', a.cls)}
+            >
+              <motion.img
+                src={a.src}
+                alt=""
+                aria-hidden
+                className="h-auto w-full drop-shadow-[0_6px_10px_rgba(0,60,120,0.25)]"
+                animate={{ x: [...a.x] }}
+                transition={{ duration: 1.2, repeat: Infinity, ease: 'easeInOut', delay: a.delay }}
+              />
+            </div>
+          ))}
+
+        {/* The three stages */}
+        {mapStages.map((s) => {
+          const layout = STAGE_LAYOUT[s.ord];
+          if (!layout) return null;
+          const badge = s.completed ? '/map/unlock.webp' : '/map/lock.webp';
+
+          return (
+            <div key={s.ord} className={cn('absolute -translate-x-1/2 -translate-y-1/2', layout.cls)}>
+              <button
+                type="button"
+                disabled={!s.unlocked}
+                onClick={() => s.unlocked && onSelect(s.ord)}
+                aria-label={`${s.title}${s.completed ? ' — đã hoàn thành' : s.unlocked ? '' : ' — chưa mở khoá'}`}
+                className={cn('group relative block w-full', s.unlocked ? 'cursor-pointer' : 'cursor-not-allowed')}
+              >
+                {/* Padlock badge over the Táo's head */}
+                <motion.img
+                  src={badge}
+                  alt=""
+                  aria-hidden
+                  className="absolute left-1/2 top-[-16%] z-10 w-[34%] -translate-x-1/2 drop-shadow-[0_6px_8px_rgba(0,60,120,0.3)]"
+                />
+                <motion.img
+                  src={layout.tao}
+                  alt=""
+                  aria-hidden
+                  className={cn(
+                    'h-auto w-full drop-shadow-[0_12px_14px_rgba(0,70,140,0.28)] transition',
+                    s.unlocked ? 'group-hover:brightness-105' : 'opacity-70 brightness-90 grayscale-[0.85]',
+                  )}
+                  whileHover={s.unlocked ? { scale: 1.06 } : undefined}
+                  {...(s.unlocked
+                    ? {
+                        animate: { y: ['0%', '-7%', '0%'] },
+                        transition: { duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: layout.delay },
+                      }
+                    : {})}
+                />
+              </button>
+
+              {/* Stage label */}
+              <p className="mt-1 text-center text-sm font-bold text-sky-900 drop-shadow-[0_1px_2px_rgba(255,255,255,0.8)] sm:text-base landscape:mt-2">
+                {s.title}
+              </p>
+            </div>
+          );
+        })}
+      </div>
+    </main>
+  );
+}

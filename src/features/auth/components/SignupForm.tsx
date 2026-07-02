@@ -33,7 +33,7 @@ export function SignupForm() {
           id="email"
           type="email"
           autoComplete="email"
-          className="rounded border px-3 py-2"
+          className="rounded-lg border border-sky-200 bg-white px-3 py-2.5 outline-none transition focus:border-sky-400 focus:ring-2 focus:ring-sky-200"
           {...register('email')}
         />
         {errors.email && <p className="text-sm text-red-600">{errors.email.message}</p>}
@@ -47,7 +47,7 @@ export function SignupForm() {
           id="username"
           type="text"
           autoComplete="username"
-          className="rounded border px-3 py-2"
+          className="rounded-lg border border-sky-200 bg-white px-3 py-2.5 outline-none transition focus:border-sky-400 focus:ring-2 focus:ring-sky-200"
           {...register('username')}
         />
         {errors.username && <p className="text-sm text-red-600">{errors.username.message}</p>}
@@ -61,7 +61,7 @@ export function SignupForm() {
           id="password"
           type="password"
           autoComplete="new-password"
-          className="rounded border px-3 py-2"
+          className="rounded-lg border border-sky-200 bg-white px-3 py-2.5 outline-none transition focus:border-sky-400 focus:ring-2 focus:ring-sky-200"
           {...register('password')}
         />
         {errors.password && <p className="text-sm text-red-600">{errors.password.message}</p>}
