@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { motion, type PanInfo } from 'motion/react';
 import { cn } from '@/utils/cn';
 import { shuffle } from '@/utils/shuffle';
@@ -56,11 +56,16 @@ export function PuzzleBoard({ onComplete }: { onComplete: () => void }) {
   const done = game.cells.every((piece, slot) => piece === slot);
   const boardFull = game.tray.length === 0;
 
+  // Latest-callback ref: the parent re-renders every second (run clock), which
+  // would recreate `onComplete` and endlessly reset a timeout that depended on
+  // it — the phase change would never fire. Depend on `done` alone.
+  const onCompleteRef = useRef(onComplete);
+  onCompleteRef.current = onComplete;
   useEffect(() => {
     if (!done) return;
-    const t = setTimeout(onComplete, 1600);
+    const t = setTimeout(() => onCompleteRef.current(), 1600);
     return () => clearTimeout(t);
-  }, [done, onComplete]);
+  }, [done]);
 
   const dropAt = (piece: number, source: Source, x: number, y: number) => {
     const slotEl = document
