@@ -11,21 +11,23 @@ export type SaveState = 'saving' | 'saved' | 'failed';
 
 const SAVE_TEXT: Record<SaveState, string> = {
   saving: 'Đang lưu tiến độ…',
-  saved: '✓ Tiến độ đã lưu — Chặng 2 đã mở khóa!',
+  saved: '✓ Tiến độ đã lưu — Chặng 3 đã mở khóa!',
   failed: '⚠ Chưa lưu được tiến độ lên máy chủ.',
 };
 
 /**
- * Victory reveal: sustained confetti, the glowing Táo (no more question
- * marks — he found his report), the unlocked identity "Táo Hội Nhập", the
- * period introduction, the run time, and the server save status.
+ * Victory reveal: sustained confetti, the glowing orange Táo, the revealed
+ * identity "Táo Cải Cách", the period introduction, run stats (time + moves)
+ * and the server save status.
  */
 export function VictoryScreen({
   elapsed,
+  moves,
   saveState,
   onReplay,
 }: {
   elapsed: number;
+  moves: number;
   saveState: SaveState;
   onReplay: () => void;
 }) {
@@ -66,8 +68,8 @@ export function VictoryScreen({
               transition={{ duration: 2.6, repeat: Infinity, ease: 'easeInOut' }}
             />
             <motion.img
-              src="/home/taodo.webp"
-              alt="Táo Hội Nhập"
+              src="/home/taocam.webp"
+              alt="Táo Cải Cách"
               draggable={false}
               initial={{ scale: 0, rotate: -12 }}
               animate={{ scale: 1, rotate: 0 }}
@@ -103,7 +105,7 @@ export function VictoryScreen({
           </motion.p>
 
           <p className="mt-3 text-sm font-bold text-sky-800">
-            ⏱ Hoàn thành trong {mm}:{ss}
+            ⏱ Hoàn thành trong {mm}:{ss} · 🔄 {moves} lượt lật
           </p>
           <p className="mt-1 text-xs text-neutral-500">{SAVE_TEXT[saveState]}</p>
 

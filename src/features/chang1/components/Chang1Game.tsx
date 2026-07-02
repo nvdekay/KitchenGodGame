@@ -6,28 +6,20 @@ import Link from 'next/link';
 import { AnimatePresence, motion } from 'motion/react';
 import { usePresenceTracker } from '@/features/presence';
 import { fireConfetti } from '@/lib/confetti';
+import { shuffle } from '@/utils/shuffle';
 import { QUESTIONS } from '../data';
 import { useChang1Sync } from '../hooks/useChang1Sync';
 import { CardMarquee } from './CardMarquee';
 import { QuestionPanel } from './QuestionPanel';
-import { FishTimer } from './FishTimer';
+import { FishTimer } from '@/components/ui/game';
 import { FeedbackModal, type Feedback } from './FeedbackModal';
 import { StoryIntro } from './StoryIntro';
 import { VictoryScreen, type SaveState } from './VictoryScreen';
 
 export type Chang1Phase = 'intro' | 'playing' | 'victory';
 
-/** Fisher–Yates shuffle of [0..n) — display order of the answer cards. */
-function shuffledIndices(n: number): number[] {
-  const a = Array.from({ length: n }, (_, i) => i);
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    const tmp = a[i] as number;
-    a[i] = a[j] as number;
-    a[j] = tmp;
-  }
-  return a;
-}
+/** Display order of the six answer cards for one question. */
+const shuffledIndices = (n: number) => shuffle(Array.from({ length: n }, (_, i) => i));
 
 /**
  * Chặng 1 — "Hồ sơ thất lạc". Orchestrates the three phases:
@@ -72,7 +64,7 @@ export function Chang1Game({
 
   // Warm the sprite cache during the intro so the playfield pops in complete.
   useEffect(() => {
-    ['/chang1/khung.webp', '/chang1/ca-thoi-gian.webp', '/chang1/tao-cham-hoi.webp'].forEach(
+    ['/chang1/khung.webp', '/game/ca-thoi-gian.webp', '/chang1/tao-cham-hoi.webp'].forEach(
       (src) => {
         const img = new window.Image();
         img.src = src;

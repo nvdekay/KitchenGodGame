@@ -2,7 +2,7 @@
 
 import { AnimatePresence, motion } from 'motion/react';
 import { cn } from '@/utils/cn';
-import { Parchment } from './ui';
+import { Parchment } from '@/components/ui/game';
 import type { Chang1Question } from '../data';
 
 /**

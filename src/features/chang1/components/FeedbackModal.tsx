@@ -2,7 +2,7 @@
 
 import { motion } from 'motion/react';
 import { cn } from '@/utils/cn';
-import { GoldButton, Parchment } from './ui';
+import { GoldButton, Parchment } from '@/components/ui/game';
 
 export type Feedback =
   | { kind: 'correct'; explanation: string; isLast: boolean }
