@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { getAuthUser } from '@/services/profile.service';
 import { GameMap } from '@/features/map';
+import { LogoutButton } from '@/features/auth';
 
 /**
  * Map route — the stage-select screen reached from the landing "BẮT ĐẦU".
@@ -17,5 +18,10 @@ export default async function MapPage() {
 
   const authUser = await getAuthUser(supabase, { id: user.id, email: user.email ?? null });
 
-  return <GameMap userId={user.id} username={authUser?.username ?? 'Player'} />;
+  return (
+    <>
+      <GameMap userId={user.id} username={authUser?.username ?? 'Player'} />
+      <LogoutButton />
+    </>
+  );
 }

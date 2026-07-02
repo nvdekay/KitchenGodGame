@@ -7,6 +7,7 @@
  */
 export { LoginForm } from './components/LoginForm';
 export { SignupForm } from './components/SignupForm';
+export { LogoutButton } from './components/LogoutButton';
 export { useAuth, useSignIn, useSignUp, useSignOut } from './hooks/useAuth';
 export { loginSchema, signupSchema } from './schemas/auth.schema';
 export type { LoginInput, SignupInput } from './schemas/auth.schema';
