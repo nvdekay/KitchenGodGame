@@ -1,177 +1,200 @@
-# KitchenGodGame
+# 🎏 Các Táo Lên Chầu — KitchenGodGame
 
-A web **quiz game**: 5 stages of mixed-type questions (single answer / multiple
-answers / true–false). Clearing a stage unlocks the next; answers are **graded on
-the server** (correct answers never reach the browser), with smooth animations,
-an admin question editor, and a **realtime** admin dashboard that tracks who has
-cleared which stage and who finished all stages fastest. Built for ~50 concurrent
-players.
+Game giáo dục trên nền web cho môn **MLN122 tại Đại học FPT**, kể chuyện các Táo
+mang báo cáo lên chầu Ngọc Hoàng nhưng gặp gió lốc làm thất lạc hồ sơ. Người chơi
+giúp các Táo khôi phục báo cáo qua **3 chặng mini-game**, mỗi chặng gắn với một
+giai đoạn của công cuộc đổi mới đất nước:
+
+| Chặng | Mini-game | Giai đoạn | Nội dung |
+| --- | --- | --- | --- |
+| 1 · Hồ sơ thất lạc | Chọn thẻ đáp án trôi trên trời (quiz 5 câu) | 1996 – 2015 | Công nghiệp hóa, hiện đại hóa, hội nhập kinh tế quốc tế (WTO, FDI…) |
+| 2 · Báo cáo bị xáo trộn | Lật thẻ tìm cặp giống nhau (8 cặp + 5 thẻ meme bẫy) | 2016 – 2024 | Cải cách hành chính, chính phủ điện tử, sáp nhập tinh gọn |
+| 3 · Khôi phục báo cáo | Ghép tranh 21 mảnh (kéo thả) + đoán từ khóa | 2025 – nay | **TINH GỌN BỘ MÁY** |
+
+Vượt cả 3 chặng sẽ mở màn **đại kết cục**: 5 Táo cưỡi cá chép lên chầu, kèm tổng
+thời gian chơi của cả hành trình.
+
+**Mục đích của repo**: sản phẩm game hóa nội dung học tập (gamified learning) cho
+lớp ~50 sinh viên chơi đồng thời trong giờ học — có xếp hạng thời gian để thi đua
+và dashboard realtime cho giảng viên theo dõi.
 
 > **Tech:** Next.js 15 (App Router) · TypeScript (strict) · TailwindCSS · Supabase
-> (Auth · Postgres + RLS · Realtime) · Zustand · React Query · Zod · React Hook
-> Form · Framer Motion. Deploys to Vercel + Supabase.
+> (Auth · Postgres + RLS · Realtime) · React Query · Zustand · Framer Motion ·
+> Zod + React Hook Form · canvas-confetti. Deploy trên Vercel + Supabase.
 
 ---
 
-## How it works
+## Luật chơi & thiết kế chính
 
-- **Players** register (email + username + password), then log in with **username
-  _or_ email**. The quiz shows 5 stages — stage 1 open, the rest 🔒 locked.
-- Answer every question in a stage correctly to **clear it and unlock the next**
-  (unlimited retries). Grading happens in a Postgres function, so answers can't be
-  inspected client-side and completion times are authoritative.
-- Finishing stage 5 records a finish time. Players are ranked by **total time**
-  (start of stage 1 → finish of stage 5).
-- **Admins** create/edit questions and watch progress update **live** (no refresh).
+- **Đăng nhập trước khi chơi** (email + username + mật khẩu; đăng nhập bằng
+  username *hoặc* email). Bản đồ mở khóa tuần tự: xong chặng 1 mới mở chặng 2…
+- **Mỗi chặng chỉ chơi đúng 1 lần** — chặng đã hoàn thành không thể vào lại
+  (chặn cả trên bản đồ lẫn khi gõ thẳng URL).
+- **Đồng hồ chỉ tính thời gian chơi thật**: màn cốt truyện/hướng dẫn, lúc đọc
+  thông điệp giáo dục đều không tính giờ. Tổng hành trình = cộng thời gian chơi
+  3 chặng, dùng để xếp hạng.
+- **Chống spam đáp án**: chọn sai ở chặng 1 bị khóa 4 giây; chọn đúng thì dừng
+  giờ và khóa 10 giây để đọc giải thích. Chặng 2: ghép đúng cặp dừng giờ 15 giây
+  đọc nội dung; dính thẻ meme bị "choáng" 6 giây trong khi đồng hồ vẫn chạy.
+- **Chấm điểm phía server** (anti-cheat): đáp án đúng nằm trong Postgres, không
+  bao giờ gửi xuống trình duyệt; các RPC `get_stage` / `submit_stage`
+  (SECURITY DEFINER) chấm bài và đóng dấu thời gian.
+- **Admin theo dõi realtime**: ai đang online, đang ở chặng nào, ma trận
+  người chơi × chặng, và bảng xếp hạng tổng thời gian chơi.
 
 ---
 
-## Requirements
+## Yêu cầu
 
-- **Node.js ≥ 20** (`node -v`) and **npm**
-- A **Supabase** project (free tier is fine) for auth + database + realtime
+- **Node.js ≥ 20** và **npm**
+- Một project **Supabase** (free tier là đủ) cho auth + database + realtime
 
-## Run it
+## Chạy dự án
 
 ```bash
-# 1. env: paste your Supabase values into .env.local
-cp .env.example .env.local        # then edit the file (see table below)
+# 1. env: điền thông tin Supabase vào .env.local
+cp .env.example .env.local        # rồi sửa file (xem bảng dưới)
 
-# 2. install
+# 2. cài đặt
 npm install
 
-# 3. database: apply migrations
+# 3. database: chạy migrations
 npx supabase link --project-ref <your-project-ref>
-npm run db:push                   # applies supabase/migrations/*
-npm run db:types                  # regenerate typed DB schema
+npm run db:push                   # áp dụng supabase/migrations/*
+npm run db:types                  # sinh lại type DB
 
-# 4. run
+# 4. chạy
 npm run dev                       # http://localhost:3000
 ```
 
-> **No Supabase CLI?** Open the Supabase **SQL Editor** and run each file in
-> `supabase/migrations/` in order (`0001` → `0005`).
+> **Không dùng Supabase CLI?** Mở **SQL Editor** của Supabase và chạy lần lượt
+> từng file trong `supabase/migrations/` theo thứ tự (`0001` → `0009`).
 
-**`.env.local` values** (from Supabase → Project Settings → API):
+**Giá trị `.env.local`** (lấy từ Supabase → Project Settings → API):
 
-| Variable                        | Where                          | Public? |
+| Biến                            | Lấy ở đâu                      | Public? |
 | ------------------------------- | ------------------------------ | ------- |
-| `NEXT_PUBLIC_SUPABASE_URL`      | Project URL                    | yes     |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | anon / public key              | yes     |
-| `NEXT_PUBLIC_LOG_LEVEL`         | `debug`                        | yes     |
-| `SUPABASE_SERVICE_ROLE_KEY`     | service_role key (**secret!**) | **no**  |
+| `NEXT_PUBLIC_SUPABASE_URL`      | Project URL                    | có      |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | anon / public key              | có      |
+| `NEXT_PUBLIC_LOG_LEVEL`         | `debug`                        | có      |
+| `SUPABASE_SERVICE_ROLE_KEY`     | service_role key (**bí mật!**) | **không** |
 
-In Supabase → **Authentication → URL Configuration**, add the redirect URL
-`http://localhost:3000/auth/callback`, and (for easy local testing) turn **off**
-"Confirm email" so signups can log in immediately.
-
-Full setup & troubleshooting: [`docs/03-local-development.md`](docs/03-local-development.md).
+Trong Supabase → **Authentication → URL Configuration**, thêm redirect URL
+`http://localhost:3000/auth/callback`; khi test local nên tắt "Confirm email"
+để đăng ký xong đăng nhập được ngay.
 
 ---
 
 ## Database migrations
 
-Run in order. Each is independent and additive.
+Chạy theo thứ tự. Mỗi file độc lập và chỉ bổ sung (additive).
 
-| File                              | Adds                                                              |
-| --------------------------------- | ---------------------------------------------------------------- |
-| `0001_init_foundation.sql`        | `profiles`, `user_roles`, role enum, RLS, signup trigger         |
-| `0002_auth_username_login.sql`    | `get_email_for_username()` (login by username), unique usernames  |
-| `0003_player_progress.sql`        | _legacy (unused)_ — kept for history                             |
-| `0004_leaderboard.sql`            | _legacy (unused)_ — kept for history                             |
-| `0005_quiz.sql`                   | `stages`, `questions`, `quiz_runs`, `stage_completions`, server  |
-|                                   | grading RPCs (`get_stage`/`submit_stage`), realtime, seed data   |
-
-> `0003`/`0004` belonged to an earlier arcade prototype that was removed. Their
-> tables are harmless but unused — drop them later if you want a clean DB.
+| File                                | Thêm gì                                                            |
+| ----------------------------------- | ------------------------------------------------------------------ |
+| `0001_init_foundation.sql`          | `profiles`, `user_roles`, RLS, trigger tạo profile khi đăng ký     |
+| `0002_auth_username_login.sql`      | `get_email_for_username()` (đăng nhập bằng username)               |
+| `0003` / `0004`                     | _legacy (không dùng)_ — giữ lại cho lịch sử                        |
+| `0005_quiz.sql`                     | `stages`, `questions`, `quiz_runs`, `stage_completions`, RPC chấm bài server, realtime |
+| `0006_chang1_hoso_thatlac.sql`      | Nội dung 5 câu hỏi chặng 1                                         |
+| `0007_chang2_bao_cao_xao_tron.sql`  | Câu hỏi đánh dấu hoàn thành (marker) chặng 2                       |
+| `0008_chang3_khoi_phuc_bao_cao.sql` | Câu hỏi marker chặng 3                                             |
+| `0009_play_seconds.sql`             | `stage_completions.play_seconds` — thời gian chơi thật từng chặng, `submit_stage` nhận thêm tham số |
 
 ---
 
-## Admin guide
+## Hướng dẫn admin
 
-**1. Become an admin.** After signing up once, run this in the Supabase SQL Editor
-(replace the email):
+**1. Cấp quyền admin.** Sau khi đăng ký tài khoản, chạy trong Supabase SQL Editor
+(thay email của bạn):
 
 ```sql
 update public.user_roles set role = 'admin'
 where user_id = (select id from auth.users where email = 'you@example.com');
 ```
 
-**2. Author content** at **`/admin/quiz`** — add/edit/delete stages and questions.
-Pick a question type (1 answer / multiple / true–false), add options, and tick the
-correct answer(s). `0005` seeds a few sample questions to start from.
+**2. Quản lý nội dung** tại **`/admin/quiz`** — thêm/sửa/xóa chặng và câu hỏi.
+Lưu ý: prompt và thứ tự đáp án của chặng 1 phải khớp với
+`src/features/chang1/data.ts` (chấm bài server-side so theo index).
 
-**3. Track players live** at **`/admin/users`** — a player × stage matrix (who
-cleared what, when) plus a fastest-finish ranking, updating in realtime. The
-**`/admin`** overview shows who's currently online and which stage they're on.
+**3. Theo dõi người chơi realtime** tại **`/admin/users`** — ma trận người chơi ×
+chặng (ai xong gì, lúc nào) + bảng xếp hạng tổng thời gian chơi, cập nhật trực
+tiếp không cần refresh. Trang **`/admin`** cho biết ai đang online và đang ở
+chặng nào.
 
 ---
 
 ## Routes
 
-| Route          | Access        | What it is                                       |
-| -------------- | ------------- | ------------------------------------------------ |
-| `/`            | public        | Landing page                                     |
-| `/login`       | public        | Sign in (username or email)                      |
-| `/signup`      | public        | Register (email + username + password)           |
-| `/play`        | authenticated | The quiz — stage select → play → submit          |
-| `/admin`       | admin role    | Overview — who's online                          |
-| `/admin/quiz`  | admin role    | Manage stages & questions (CRUD)                 |
-| `/admin/users` | admin role    | Live tracking: progress matrix + finish ranking  |
+| Route          | Quyền truy cập | Là gì                                              |
+| -------------- | -------------- | -------------------------------------------------- |
+| `/`            | public         | Màn hình chào — 5 Táo + nút BẮT ĐẦU                |
+| `/login`       | public         | Đăng nhập (username hoặc email)                    |
+| `/signup`      | public         | Đăng ký (email + username + mật khẩu)              |
+| `/map`         | đã đăng nhập   | Bản đồ chọn chặng (khóa/mở theo tiến độ, đồng hồ)  |
+| `/chang/[ord]` | đã đăng nhập   | Chặng 1/2/3 — mini-game tương ứng                  |
+| `/play`        | đã đăng nhập   | Redirect về `/map` (giữ link cũ)                   |
+| `/admin`       | role admin     | Tổng quan — ai đang online                         |
+| `/admin/quiz`  | role admin     | CRUD chặng & câu hỏi                               |
+| `/admin/users` | role admin     | Tracking realtime: ma trận tiến độ + xếp hạng      |
 
-Access is enforced in three layers: middleware (session) → server guard (role) →
-Postgres RLS (data).
+Phân quyền 3 lớp: middleware (session) → server guard (role) → Postgres RLS (data).
 
 ---
 
-## Project structure
+## Cấu trúc dự án
 
 ```
 src/
-├── app/                      # routes (App Router): (app)/play, (auth)/*, admin/*
-├── components/               # shared UI (ui/, layout/AppHeader)
-├── features/                 # vertical slices — each owns UI+hooks+services+schema
-│   ├── auth/                 #   login/signup, session
-│   ├── quiz/                 #   player: stage select, play, submit
-│   ├── quiz-admin/           #   admin: stage/question CRUD
-│   ├── quiz-tracking/        #   admin: realtime progress dashboard
-│   ├── presence/             #   realtime "who's online"
-│   ├── admin/                #   admin layout guard + nav
-│   └── _template/            #   copy this to start a new feature
-├── lib/                      # env, logger, errors, eventBus, supabase clients, confetti
-├── hooks/                    # shared hooks (useRealtimeChannel)
+├── app/                      # routes (App Router): /, map, chang/[ord], (auth)/*, admin/*, play
+├── components/ui/            # UI dùng chung (Button, Parchment, GoldButton, FishTimer…)
+├── features/                 # vertical slices — mỗi feature tự chứa UI + hooks + services + data
+│   ├── home/                 #   splash 5 Táo
+│   ├── map/                  #   bản đồ chọn chặng
+│   ├── chang1/               #   Hồ sơ thất lạc — thẻ đáp án trôi
+│   ├── chang2/               #   Báo cáo bị xáo trộn — lật thẻ tìm cặp
+│   ├── chang3/               #   Khôi phục báo cáo — ghép tranh + từ khóa + đại kết cục
+│   ├── quiz/                 #   trạng thái chặng, đồng hồ giờ chơi (usePlayClock), marker
+│   ├── quiz-admin/           #   admin: CRUD chặng/câu hỏi
+│   ├── quiz-tracking/        #   admin: dashboard tiến độ realtime + xếp hạng
+│   ├── presence/             #   realtime "ai đang online"
+│   ├── auth/                 #   đăng nhập/đăng ký/đăng xuất
+│   └── admin/                #   guard + nav khu admin
+├── lib/                      # env (zod), logger, errors, supabase clients, confetti
+├── hooks/                    # useRealtimeChannel
 ├── providers/                # React Query + Auth providers
-├── services/                 # cross-feature data access (profiles)
-├── stores/                   # Zustand (authStore, uiStore)
-├── types/                    # shared + generated DB types
-└── utils/                    # pure helpers (cn)
+├── services/                 # truy cập dữ liệu liên feature (profiles)
+├── stores/                   # Zustand (authStore)
+├── types/                    # type dùng chung + type DB sinh tự động
+└── utils/                    # helpers thuần (cn, shuffle)
+public/                       # asset game theo màn: home/, map/, chang1-3/, game/, end/
+supabase/migrations/          # schema + nội dung, chạy theo thứ tự 0001 → 0009
 ```
-
-See [`docs/02-folder-structure.md`](docs/02-folder-structure.md) for the rules of
-each folder, and [`src/features/README.md`](src/features/README.md) for how to add
-a feature.
 
 ---
 
-## Documentation
-
-| #   | Guide                                                          |
-| --- | -------------------------------------------------------------- |
-| 1   | [System Architecture](docs/01-system-architecture.md)         |
-| 2   | [Folder Structure Guide](docs/02-folder-structure.md)         |
-| 3   | [Local Development Guide](docs/03-local-development.md)        |
-| 4   | [Supabase Setup Guide](docs/04-supabase-setup.md)             |
-| 6   | [Future Expansion Guide](docs/06-future-expansion.md)         |
-| 7   | [Deployment Guide (Vercel + Supabase)](docs/07-deployment.md) |
-
 ## Scripts
 
-| Command             | Purpose                                  |
+| Lệnh                | Mục đích                                 |
 | ------------------- | ---------------------------------------- |
 | `npm run dev`       | Dev server                               |
 | `npm run build`     | Production build                         |
 | `npm run typecheck` | `tsc --noEmit` (strict)                  |
 | `npm run lint`      | ESLint                                   |
-| `npm run db:push`   | Apply migrations to linked Supabase      |
-| `npm run db:types`  | Regenerate `src/types/database.types.ts` |
-| `npm run loadtest`  | Simulate concurrent players (self-cleaning) — `npm run loadtest -- --users 50` |
+| `npm run db:push`   | Áp dụng migrations lên Supabase đã link  |
+| `npm run db:types`  | Sinh lại `src/types/database.types.ts`   |
+| `npm run loadtest`  | Giả lập người chơi đồng thời (tự dọn dẹp) — `npm run loadtest -- --users 50` |
+
+## Tài liệu
+
+| #   | Guide                                                          |
+| --- | -------------------------------------------------------------- |
+| 1   | [System Architecture](docs/01-system-architecture.md)          |
+| 2   | [Folder Structure Guide](docs/02-folder-structure.md)          |
+| 3   | [Local Development Guide](docs/03-local-development.md)        |
+| 4   | [Supabase Setup Guide](docs/04-supabase-setup.md)              |
+| 6   | [Future Expansion Guide](docs/06-future-expansion.md)          |
+| 7   | [Deployment Guide (Vercel + Supabase)](docs/07-deployment.md)  |
+
+---
+
+<p align="center">Made by <b>Nguyen Vu Dang Khanh</b></p>

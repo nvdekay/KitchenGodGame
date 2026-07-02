@@ -2,7 +2,7 @@
   "name": "kitchen-god-game",
   "version": "0.1.0",
   "private": true,
-  "description": "Browser-based game platform foundation (Next.js 15 + Phaser 3 + Supabase).",
+  "description": "Các Táo Lên Chầu — educational web game for MLN122 @ FPT University (Next.js 15 + Supabase).",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
