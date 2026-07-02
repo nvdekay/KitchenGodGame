@@ -58,7 +58,6 @@ npm run dev                       # http://localhost:3000
 | ------------------------------- | ------------------------------ | ------- |
 | `NEXT_PUBLIC_SUPABASE_URL`      | Project URL                    | yes     |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | anon / public key              | yes     |
-| `NEXT_PUBLIC_APP_URL`           | `http://localhost:3000`        | yes     |
 | `NEXT_PUBLIC_LOG_LEVEL`         | `debug`                        | yes     |
 | `SUPABASE_SERVICE_ROLE_KEY`     | service_role key (**secret!**) | **no**  |
 

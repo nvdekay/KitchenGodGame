@@ -46,17 +46,16 @@ Project → **Settings → Environment Variables**. Add these for **Production**
 | ------------------------------- | --------------------------------------- | ------------------------------ |
 | `NEXT_PUBLIC_SUPABASE_URL`      | your Supabase Project URL               | same as local                  |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | your anon/public key                    | same as local                  |
-| `NEXT_PUBLIC_APP_URL`           | `https://<your-vercel-domain>`          | **the production URL**         |
-| `NEXT_PUBLIC_LOG_LEVEL`         | `info`                                  | quieter logs in prod           |
-| `SUPABASE_SERVICE_ROLE_KEY`     | your service_role key                   | **Secret — never `NEXT_PUBLIC`** |
+| `NEXT_PUBLIC_LOG_LEVEL`         | `info`                                  | optional (defaults to `info`)  |
+| `SUPABASE_SERVICE_ROLE_KEY`     | your service_role key                   | optional today; **Secret — never `NEXT_PUBLIC`** |
+
+> `NEXT_PUBLIC_APP_URL` is **no longer required** — the app derives its origin
+> from each request, so only the two Supabase keys are needed to build & run.
 
 > `src/lib/env.ts` validates these at boot, so a missing/misnamed var fails the
 > build with a clear message instead of breaking at runtime.
 
 Then click **Deploy**. You'll get a URL like `https://kitchen-god-game.vercel.app`.
-
-If you set `NEXT_PUBLIC_APP_URL` only after the first deploy (because you didn't
-know the domain yet), update it and **redeploy** so it takes effect.
 
 ## Step 4 — Point Supabase Auth at the production domain
 
@@ -111,7 +110,6 @@ event delivered.
 ## Production checklist
 
 - [ ] Env vars set on Vercel (service role marked Secret).
-- [ ] `NEXT_PUBLIC_APP_URL` = real domain; redeployed if changed.
 - [ ] Supabase Site URL + Redirect URL include the production domain.
 - [ ] Email confirmation setting is what you want (on = users must confirm before
       login; off = instant login after signup).
@@ -124,7 +122,7 @@ event delivered.
 | Symptom                                   | Fix                                                      |
 | ----------------------------------------- | ------------------------------------------------------- |
 | Build fails: "Invalid … environment variables" | A required env var is missing on Vercel.           |
-| Redirected to `/login` forever            | `NEXT_PUBLIC_APP_URL` wrong, or Supabase redirect URL not set. |
+| Redirected to `/login` forever            | Supabase redirect URL not set for the production domain. |
 | Auth callback fails                       | Add `https://<domain>/auth/callback` to Supabase redirect URLs. |
 | Leaderboard/presence not live in prod     | Confirm Realtime is enabled and `player_progress` is in the `supabase_realtime` publication (migration 0004). |
 | Admin page 403/redirects                  | The signed-in user lacks the `admin` role (see `docs/04`). |

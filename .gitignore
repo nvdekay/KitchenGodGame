@@ -26,3 +26,6 @@ next-env.d.ts
 npm-debug.log*
 .vercel
 *.tsbuildinfo
+
+# verification builds (NEXT_DIST_DIR)
+/.next-build/

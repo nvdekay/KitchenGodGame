@@ -3,13 +3,14 @@ import { createClient } from '@/lib/supabase/server';
 
 /**
  * OAuth / email-confirmation callback. Supabase redirects here with a `code`
- * which we exchange for a session cookie, then forward the user on. Wire your
- * Supabase Auth redirect URLs to `${APP_URL}/auth/callback`.
+ * which we exchange for a session cookie, then forward the user on. In the
+ * Supabase dashboard, add `<your-deployed-origin>/auth/callback` to the Auth
+ * redirect URLs (the origin is derived from the request — no env var needed).
  */
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get('code');
-  const redirectTo = searchParams.get('redirectTo') ?? '/play';
+  const redirectTo = searchParams.get('redirectTo') ?? '/map';
 
   if (code) {
     const supabase = await createClient();

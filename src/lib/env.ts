@@ -11,13 +11,24 @@ import { z } from 'zod';
  * RULE: anything read in the browser MUST be prefixed `NEXT_PUBLIC_`.
  */
 
+// `?? undefined`-style preprocess: deployments sometimes define a var as an
+// EMPTY string (Vercel dashboard quirk) — treat that the same as unset so
+// optional()/default() apply instead of failing validation and the build.
+const emptyAsUndefined = (v: unknown) => (v === '' ? undefined : v);
+
 const clientSchema = z.object({
   NEXT_PUBLIC_SUPABASE_URL: z.string().url(),
   NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().min(1),
-  NEXT_PUBLIC_APP_URL: z.string().url(),
-  NEXT_PUBLIC_LOG_LEVEL: z
-    .enum(['debug', 'info', 'warn', 'error'])
-    .default('info'),
+  /**
+   * OPTIONAL absolute origin override. The app derives its origin from each
+   * request (see auth/callback), so deployments (Vercel/preview) don't need to
+   * set this — requiring it used to break `next build` on Vercel.
+   */
+  NEXT_PUBLIC_APP_URL: z.preprocess(emptyAsUndefined, z.string().url().optional()),
+  NEXT_PUBLIC_LOG_LEVEL: z.preprocess(
+    emptyAsUndefined,
+    z.enum(['debug', 'info', 'warn', 'error']).default('info'),
+  ),
 });
 
 const serverSchema = z.object({
