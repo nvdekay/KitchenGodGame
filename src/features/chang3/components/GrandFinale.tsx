@@ -56,7 +56,7 @@ export function GrandFinale({ elapsed }: { elapsed: number }) {
         transition={{ delay: 0.5, type: 'spring', stiffness: 240, damping: 15 }}
         className="rounded-full border-2 border-amber-300 bg-white/85 px-5 py-2 text-sm font-black text-sky-900 shadow-lg backdrop-blur sm:text-base"
       >
-        🏁 Tổng thời gian cả hành trình: {mm}:{ss}
+        🏁 Tổng thời gian chơi cả hành trình: {mm}:{ss}
       </motion.p>
 
       {/* The five Táo riding home on their koi */}

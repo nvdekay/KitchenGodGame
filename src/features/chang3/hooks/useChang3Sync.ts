@@ -22,13 +22,15 @@ export function useChang3Sync(userId: string) {
   });
 
   const submit = useMutation({
-    mutationFn: () =>
-      marker.data ? submitStageMarker(STAGE_ORD, marker.data) : Promise.resolve(false),
+    mutationFn: (playSeconds: number) =>
+      marker.data
+        ? submitStageMarker(STAGE_ORD, marker.data, playSeconds)
+        : Promise.resolve(false),
     onSuccess: (passed) => {
       if (passed) {
-        // Refresh map statuses + freeze the run clock at the server's finished_at.
+        // Refresh map statuses + fold the final stage's time into the clock.
         qc.invalidateQueries({ queryKey: ['quiz', 'stages', userId] });
-        qc.invalidateQueries({ queryKey: ['quiz', 'run', userId] });
+        qc.invalidateQueries({ queryKey: ['quiz', 'play-seconds', userId] });
       }
     },
   });

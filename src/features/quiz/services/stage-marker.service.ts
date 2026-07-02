@@ -28,13 +28,19 @@ export async function fetchStageMarkerId(ord: number): Promise<string | null> {
   }
 }
 
-/** Answer a stage's completion marker. True when the server recorded the pass. */
-export async function submitStageMarker(ord: number, markerId: string): Promise<boolean> {
+/** Answer a stage's completion marker, reporting the stage's active play time.
+ *  True when the server recorded the pass. */
+export async function submitStageMarker(
+  ord: number,
+  markerId: string,
+  playSeconds: number,
+): Promise<boolean> {
   try {
     const db = createClient();
     const { data, error } = await db.rpc('submit_stage', {
       p_ord: ord,
       p_answers: { [markerId]: [0] },
+      p_play_seconds: Math.max(0, Math.round(playSeconds)),
     });
     if (error) return false;
     return Boolean((data as { passed?: boolean } | null)?.passed);

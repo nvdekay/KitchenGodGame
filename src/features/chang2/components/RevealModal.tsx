@@ -1,25 +1,40 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
+import { cn } from '@/utils/cn';
 import { GoldButton, Parchment } from '@/components/ui/game';
 import type { MemeDef, PairDef } from '../data';
 
 export type Reveal = { type: 'pair'; pair: PairDef } | { type: 'meme'; meme: MemeDef };
 
 /**
- * Post-flip pop-up. A matched pair opens its educational "vỡ ra" card (image +
- * title + payload); a meme opens the trap card — big meme, punchline, move on.
- * The board is frozen underneath while this is open.
+ * Post-flip pop-up, with a read-lock so it can't be clicked through:
+ *   • matched pair → educational card, locked 15s while the clock is PAUSED
+ *     by the parent (reading the payload is free time).
+ *   • meme trap    → locked a full 6s "stun" while the clock KEEPS RUNNING —
+ *     that wasted time is the whole punishment.
+ * The board is frozen underneath; the CTA counts the lock down and only then
+ * becomes pressable (the backdrop never dismisses while locked).
  */
+const LOCK_SECONDS = { pair: 15, meme: 6 } as const;
+
 export function RevealModal({ reveal, onClose }: { reveal: Reveal; onClose: () => void }) {
   const isPair = reveal.type === 'pair';
+
+  const [lockLeft, setLockLeft] = useState<number>(() => LOCK_SECONDS[reveal.type]);
+  useEffect(() => {
+    const t = setInterval(() => setLockLeft((s) => (s > 0 ? s - 1 : 0)), 1000);
+    return () => clearInterval(t);
+  }, []);
+  const locked = lockLeft > 0;
 
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      onClick={isPair ? undefined : onClose}
+      onClick={!isPair && !locked ? onClose : undefined}
       className="fixed inset-0 z-50 grid place-items-center bg-sky-950/40 p-4 backdrop-blur-[3px]"
     >
       <motion.div
@@ -59,8 +74,15 @@ export function RevealModal({ reveal, onClose }: { reveal: Reveal; onClose: () =
               <p className="mt-2 rounded-2xl bg-amber-100/70 px-4 py-3 text-left text-sm font-medium leading-relaxed text-amber-950 sm:text-[15px]">
                 💡 {reveal.pair.content}
               </p>
-              <GoldButton onClick={onClose} className="mt-4">
-                Tuyệt! Tiếp tục →
+              <p className="mt-2 text-xs font-semibold text-sky-700">
+                ⏸️ Đồng hồ đang tạm dừng, cứ đọc thong thả nhé!
+              </p>
+              <GoldButton
+                onClick={locked ? undefined : onClose}
+                disabled={locked}
+                className={cn('mt-4', locked && 'opacity-60 saturate-50')}
+              >
+                {locked ? `📖 Đọc thông điệp… ${lockLeft}s` : 'Tuyệt! Tiếp tục →'}
               </GoldButton>
             </>
           ) : (
@@ -89,10 +111,17 @@ export function RevealModal({ reveal, onClose }: { reveal: Reveal; onClose: () =
                 “{reveal.meme.caption}”
               </p>
               <p className="mt-1 text-sm text-neutral-600">
-                Đây không phải tài liệu báo cáo — lật tiếp thôi!
+                Đây không phải tài liệu báo cáo, lật tiếp thôi!
               </p>
-              <GoldButton onClick={onClose} className="mt-4">
-                Lật tiếp 😤
+              <p className="mt-1 text-xs font-semibold text-red-500">
+                ⏰ Đồng hồ vẫn đang chạy đó nha!
+              </p>
+              <GoldButton
+                onClick={locked ? undefined : onClose}
+                disabled={locked}
+                className={cn('mt-4', locked && 'opacity-60 saturate-50')}
+              >
+                {locked ? `😵 Bị choáng… ${lockLeft}s` : 'Lật tiếp 😤'}
               </GoldButton>
             </>
           )}

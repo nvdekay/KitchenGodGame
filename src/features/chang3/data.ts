@@ -48,6 +48,7 @@ export const STORY = {
     '🔁 Thả nhầm? Kéo mảnh này thả lên mảnh kia để đổi chỗ',
     '📌 4 góc đã được ghép sẵn làm mốc',
     '🔤 Ghép xong: đoán cụm từ khóa từ bức tranh',
+    '⏱️ Đồng hồ chỉ chạy trong lúc chơi, đọc màn này thoải mái',
   ],
   cta: 'Bắt đầu ghép hình',
 };

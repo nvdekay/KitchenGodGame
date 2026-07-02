@@ -5,7 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { AnimatePresence, motion } from 'motion/react';
 import { usePresenceTracker } from '@/features/presence';
-import { useRunClock } from '@/features/quiz';
+import { usePlayClock } from '@/features/quiz';
 import { fireConfetti } from '@/lib/confetti';
 import { FishTimer } from '@/components/ui/game';
 import { cn } from '@/utils/cn';
@@ -61,7 +61,7 @@ export function Chang2Game({
   initialPhase?: Chang2Phase;
 }) {
   const [phase, setPhase] = useState<Chang2Phase>(initialPhase);
-  const [board, setBoard] = useState<BoardCard[]>(buildBoard);
+  const [board] = useState<BoardCard[]>(buildBoard);
   const [faceUp, setFaceUp] = useState<string[]>([]);
   const [matched, setMatched] = useState<string[]>([]);
   const [reveal, setReveal] = useState<Reveal | null>(null);
@@ -71,8 +71,13 @@ export function Chang2Game({
   const submittedRef = useRef(false);
 
   const { submit } = useChang2Sync(userId);
-  // Whole-journey clock (chặng 1 → 3), started server-side on first stage open.
-  const elapsed = useRunClock(userId);
+  // Active-play clock: ticks only while the board is live — not during the
+  // intro, and not while a matched pair's educational pop-up is being read.
+  // A meme trap's 6s stun DOES tick: the wasted time is the punishment.
+  const running = phase === 'playing' && reveal?.type !== 'pair';
+  const { total: elapsed, stageSeconds } = usePlayClock(userId, { stageOrd: 2, running });
+  const stageSecondsRef = useRef(0);
+  stageSecondsRef.current = stageSeconds;
   usePresenceTracker({ userId, username, stage: 2 });
 
   // Warm every card image during the intro so flips reveal instantly.
@@ -89,11 +94,11 @@ export function Chang2Game({
     });
   }, []);
 
-  // Record the run once on victory.
+  // Record the run once on victory, with this stage's active play time.
   useEffect(() => {
     if (phase === 'victory' && !submittedRef.current) {
       submittedRef.current = true;
-      submit.mutate();
+      submit.mutate(stageSecondsRef.current);
     }
   }, [phase, submit]);
 
@@ -152,18 +157,6 @@ export function Chang2Game({
     setReveal(null);
     setBusy(false);
     if (matched.length === PAIRS.length) schedule(350, () => setPhase('victory'));
-  };
-
-  const handleReplay = () => {
-    clearTimeout(timeoutRef.current ?? undefined);
-    submittedRef.current = false;
-    setBoard(buildBoard());
-    setFaceUp([]);
-    setMatched([]);
-    setReveal(null);
-    setBusy(false);
-    setMoves(0);
-    setPhase('playing');
   };
 
   const saveState: SaveState =
@@ -267,12 +260,7 @@ export function Chang2Game({
             animate={{ opacity: 1 }}
             transition={{ duration: 0.4 }}
           >
-            <VictoryScreen
-              elapsed={elapsed}
-              moves={moves}
-              saveState={saveState}
-              onReplay={handleReplay}
-            />
+            <VictoryScreen elapsed={elapsed} moves={moves} saveState={saveState} />
           </motion.div>
         )}
       </AnimatePresence>

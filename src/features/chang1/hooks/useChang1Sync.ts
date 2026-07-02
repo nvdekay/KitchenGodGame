@@ -20,13 +20,13 @@ export function useChang1Sync(userId: string) {
   });
 
   const submit = useMutation({
-    mutationFn: (picks: Record<number, number>) =>
-      ids.data ? svc.submitRun(ids.data, picks) : Promise.resolve(false),
+    mutationFn: ({ picks, playSeconds }: { picks: Record<number, number>; playSeconds: number }) =>
+      ids.data ? svc.submitRun(ids.data, picks, playSeconds) : Promise.resolve(false),
     onSuccess: (passed) => {
       if (passed) {
-        // Unlock chặng 2 on the map + keep the run clock in sync.
+        // Unlock chặng 2 on the map + fold this stage's time into the clock.
         qc.invalidateQueries({ queryKey: ['quiz', 'stages', userId] });
-        qc.invalidateQueries({ queryKey: ['quiz', 'run', userId] });
+        qc.invalidateQueries({ queryKey: ['quiz', 'play-seconds', userId] });
       }
     },
   });

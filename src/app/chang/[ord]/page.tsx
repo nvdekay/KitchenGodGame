@@ -22,6 +22,16 @@ export default async function ChangPage({ params }: { params: Promise<{ ord: str
   } = await supabase.auth.getUser();
   if (!user) redirect(`/login?redirectTo=/chang/${ord}`);
 
+  // Each stage is played exactly once — an already-cleared stage bounces back
+  // to the map (also covers typing the URL by hand).
+  const { data: done } = await supabase
+    .from('stage_completions')
+    .select('stage_ord')
+    .eq('user_id', user.id)
+    .eq('stage_ord', ord)
+    .maybeSingle();
+  if (done) redirect('/map');
+
   const authUser = await getAuthUser(supabase, { id: user.id, email: user.email ?? null });
 
   const username = authUser?.username ?? 'Player';

@@ -70,7 +70,7 @@ export const QUESTIONS: Chang1Question[] = [
     ],
     correctIndex: 1,
     explanation:
-      'FDI mang lại vốn, công nghệ và kỹ năng quản lý — động lực chính giúp Việt Nam tăng trưởng.',
+      'FDI mang lại vốn, công nghệ và kỹ năng quản lý, là động lực chính giúp Việt Nam tăng trưởng.',
   },
   {
     ord: 4,
@@ -100,7 +100,7 @@ export const QUESTIONS: Chang1Question[] = [
     ],
     correctIndex: 1,
     explanation:
-      'Hội nhập kinh tế quốc tế nhằm mở rộng hợp tác với thế giới — đưa hàng hoá, nguồn vốn và vị thế Việt Nam vươn ra toàn cầu.',
+      'Hội nhập kinh tế quốc tế nhằm mở rộng hợp tác với thế giới, đưa hàng hoá, nguồn vốn và vị thế Việt Nam vươn ra toàn cầu.',
   },
 ];
 
@@ -110,13 +110,15 @@ export const STORY = {
   title: 'Hồ sơ thất lạc',
   period: 'Giai đoạn 1996 – 2015',
   beats: [
-    'Canh ba, gà chưa gáy. Cổng thiên đình sắp mở — các Táo tay ôm sớ, xếp hàng chờ vào chầu Ngọc Hoàng.',
-    'Bỗng… VÙ! Một cơn gió lốc quét ngang lưng trời. Bản báo cáo của một vị Táo bung tung toé — những trang hồ sơ quý giá bay lẫn vào tài liệu của bao giai đoạn khác!',
+    'Canh ba, gà chưa gáy. Cổng thiên đình sắp mở, các Táo tay ôm sớ xếp hàng chờ vào chầu Ngọc Hoàng.',
+    'Bỗng… VÙ! Một cơn gió lốc quét ngang lưng trời. Bản báo cáo của một vị Táo bung tung toé, bao nhiêu trang hồ sơ quý giá bay lẫn vào tài liệu của các giai đoạn khác!',
     'Không có báo cáo, Táo không thể vào chầu. Hãy giúp Táo nhặt đúng những THẺ THÔNG TIN thuộc giai đoạn 1996–2015 để ghép lại bản báo cáo hoàn chỉnh!',
   ],
   howto: [
     '☁️ Các thẻ đáp án trôi qua lại trên trời',
     '👆 Chạm vào thẻ ĐÚNG với câu hỏi',
+    '⏳ Chọn sai phải chờ 4 giây mới được chọn tiếp',
+    '💡 Chọn đúng: đồng hồ tạm dừng 10 giây để bạn đọc thông điệp',
     '📜 Đúng cả 5 câu để hoàn thiện hồ sơ',
   ],
   cta: 'Bắt đầu tìm hồ sơ',

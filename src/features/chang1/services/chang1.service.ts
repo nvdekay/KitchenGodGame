@@ -30,12 +30,14 @@ export async function fetchQuestionIds(): Promise<Map<number, string> | null> {
 }
 
 /**
- * Submit the finished run (question ord → picked option index). Returns true
- * when the server graded it as passed and recorded the completion.
+ * Submit the finished run (question ord → picked option index) plus the
+ * stage's active play time. Returns true when the server graded it as passed
+ * and recorded the completion.
  */
 export async function submitRun(
   ids: Map<number, string>,
   picks: Record<number, number>,
+  playSeconds: number,
 ): Promise<boolean> {
   const answers: Record<string, number[]> = {};
   for (const [ord, pick] of Object.entries(picks)) {
@@ -48,6 +50,7 @@ export async function submitRun(
     const { data, error } = await db.rpc('submit_stage', {
       p_ord: STAGE_ORD,
       p_answers: answers,
+      p_play_seconds: Math.max(0, Math.round(playSeconds)),
     });
     if (error) return false;
     return Boolean((data as { passed?: boolean } | null)?.passed);

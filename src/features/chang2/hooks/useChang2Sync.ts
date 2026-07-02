@@ -23,13 +23,15 @@ export function useChang2Sync(userId: string) {
   });
 
   const submit = useMutation({
-    mutationFn: () =>
-      marker.data ? submitStageMarker(STAGE_ORD, marker.data) : Promise.resolve(false),
+    mutationFn: (playSeconds: number) =>
+      marker.data
+        ? submitStageMarker(STAGE_ORD, marker.data, playSeconds)
+        : Promise.resolve(false),
     onSuccess: (passed) => {
       if (passed) {
-        // Unlock chặng 3 on the map + keep the run clock in sync.
+        // Unlock chặng 3 on the map + fold this stage's time into the clock.
         qc.invalidateQueries({ queryKey: ['quiz', 'stages', userId] });
-        qc.invalidateQueries({ queryKey: ['quiz', 'run', userId] });
+        qc.invalidateQueries({ queryKey: ['quiz', 'play-seconds', userId] });
       }
     },
   });

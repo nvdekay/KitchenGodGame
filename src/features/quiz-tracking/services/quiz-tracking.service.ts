@@ -13,7 +13,9 @@ export interface PlayerRow {
   finishedAt: string | null;
   /** stage ord → completed_at ISO string. */
   completedStages: Record<number, string>;
-  /** total time to finish all stages (ms), or null if not finished. */
+  /** Total ACTIVE play time across all stages (ms) once finished, or null.
+   *  Falls back to wall-clock started→finished for rows recorded before the
+   *  play_seconds migration (0009). */
   elapsedMs: number | null;
 }
 
@@ -32,7 +34,8 @@ export async function getQuizDashboard(db: TypedSupabaseClient): Promise<Dashboa
     (async () =>
       (await db.from('quiz_runs').select('user_id,started_at,finished_at')).data ?? [])(),
     (async () =>
-      (await db.from('stage_completions').select('user_id,stage_ord,completed_at')).data ?? [])(),
+      (await db.from('stage_completions').select('user_id,stage_ord,completed_at,play_seconds'))
+        .data ?? [])(),
   ]);
 
   const stageOrds = stages.map((s) => s.ord);
@@ -40,10 +43,12 @@ export async function getQuizDashboard(db: TypedSupabaseClient): Promise<Dashboa
   const runOf = new Map(runs.map((r) => [r.user_id, r]));
 
   const compsOf = new Map<string, Record<number, string>>();
+  const playSecondsOf = new Map<string, number>();
   for (const c of comps) {
     const m = compsOf.get(c.user_id) ?? {};
     m[c.stage_ord] = c.completed_at;
     compsOf.set(c.user_id, m);
+    playSecondsOf.set(c.user_id, (playSecondsOf.get(c.user_id) ?? 0) + (c.play_seconds ?? 0));
   }
 
   const userIds = new Set<string>([
@@ -55,14 +60,17 @@ export async function getQuizDashboard(db: TypedSupabaseClient): Promise<Dashboa
     const run = runOf.get(uid);
     const startedAt = run?.started_at ?? null;
     const finishedAt = run?.finished_at ?? null;
+    const playMs = (playSecondsOf.get(uid) ?? 0) * 1000;
+    const wallMs =
+      startedAt && finishedAt ? Date.parse(finishedAt) - Date.parse(startedAt) : null;
     return {
       userId: uid,
       username: nameOf.get(uid) ?? uid.slice(0, 8),
       startedAt,
       finishedAt,
       completedStages: compsOf.get(uid) ?? {},
-      elapsedMs:
-        startedAt && finishedAt ? Date.parse(finishedAt) - Date.parse(startedAt) : null,
+      // Rank by active play time; pre-0009 rows (no play_seconds) keep wall-clock.
+      elapsedMs: finishedAt ? (playMs > 0 ? playMs : wallMs) : null,
     };
   });
 

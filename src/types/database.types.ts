@@ -129,6 +129,7 @@ export interface Database {
           completed_at: string;
           correct_count: number;
           total: number;
+          play_seconds: number;
         };
         Insert: {
           user_id: string;
@@ -136,8 +137,14 @@ export interface Database {
           completed_at?: string;
           correct_count?: number;
           total?: number;
+          play_seconds?: number;
         };
-        Update: { completed_at?: string; correct_count?: number; total?: number };
+        Update: {
+          completed_at?: string;
+          correct_count?: number;
+          total?: number;
+          play_seconds?: number;
+        };
         Relationships: [];
       };
     };
@@ -164,7 +171,7 @@ export interface Database {
         Returns: Json;
       };
       submit_stage: {
-        Args: { p_ord: number; p_answers: Json };
+        Args: { p_ord: number; p_answers: Json; p_play_seconds?: number };
         Returns: Json;
       };
     };

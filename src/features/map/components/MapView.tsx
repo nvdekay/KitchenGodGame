@@ -115,10 +115,12 @@ export function MapView({
             </div>
           ))}
 
-        {/* The three stages */}
+        {/* The three stages — each is played exactly ONCE: completed stages
+            show the open padlock but are no longer clickable. */}
         {mapStages.map((s) => {
           const layout = STAGE_LAYOUT[s.ord];
           if (!layout) return null;
+          const playable = s.unlocked && !s.completed;
           const badge = s.completed ? '/map/unlock.webp' : '/map/lock.webp';
           // "Chặng 1: Hồ sơ thất lạc" → big "Chặng 1" + small subtitle line.
           const [titleMain, titleSub] = s.title.split(/:\s*/);
@@ -127,10 +129,13 @@ export function MapView({
             <div key={s.ord} className={cn('absolute -translate-x-1/2 -translate-y-1/2', layout.cls)}>
               <button
                 type="button"
-                disabled={!s.unlocked}
-                onClick={() => s.unlocked && onSelect(s.ord)}
+                disabled={!playable}
+                onClick={() => playable && onSelect(s.ord)}
                 aria-label={`${s.title}${s.completed ? ' — đã hoàn thành' : s.unlocked ? '' : ' — chưa mở khoá'}`}
-                className={cn('group relative block w-full', s.unlocked ? 'cursor-pointer' : 'cursor-not-allowed')}
+                className={cn(
+                  'group relative block w-full',
+                  playable ? 'cursor-pointer' : s.completed ? 'cursor-default' : 'cursor-not-allowed',
+                )}
               >
                 {/* Padlock badge over the Táo's head */}
                 <motion.img
@@ -145,9 +150,10 @@ export function MapView({
                   aria-hidden
                   className={cn(
                     'h-auto w-full drop-shadow-[0_12px_14px_rgba(0,70,140,0.28)] transition',
-                    s.unlocked ? 'group-hover:brightness-105' : 'opacity-70 brightness-90 grayscale-[0.85]',
+                    playable && 'group-hover:brightness-105',
+                    !s.unlocked && 'opacity-70 brightness-90 grayscale-[0.85]',
                   )}
-                  whileHover={s.unlocked ? { scale: 1.06 } : undefined}
+                  whileHover={playable ? { scale: 1.06 } : undefined}
                   {...(s.unlocked
                     ? {
                         animate: { y: ['0%', '-7%', '0%'] },

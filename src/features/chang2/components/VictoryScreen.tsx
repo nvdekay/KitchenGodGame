@@ -11,7 +11,7 @@ export type SaveState = 'saving' | 'saved' | 'failed';
 
 const SAVE_TEXT: Record<SaveState, string> = {
   saving: 'Đang lưu tiến độ…',
-  saved: '✓ Tiến độ đã lưu — Chặng 3 đã mở khóa!',
+  saved: '✓ Tiến độ đã lưu, Chặng 3 đã mở khóa!',
   failed: '⚠ Chưa lưu được tiến độ lên máy chủ.',
 };
 
@@ -24,12 +24,10 @@ export function VictoryScreen({
   elapsed,
   moves,
   saveState,
-  onReplay,
 }: {
   elapsed: number;
   moves: number;
   saveState: SaveState;
-  onReplay: () => void;
 }) {
   const router = useRouter();
   const mm = String(Math.floor(elapsed / 60)).padStart(2, '0');
@@ -105,19 +103,12 @@ export function VictoryScreen({
           </motion.p>
 
           <p className="mt-3 text-sm font-bold text-sky-800">
-            ⏱ Tổng thời gian hành trình: {mm}:{ss} · 🔄 {moves} lượt lật
+            ⏱ Tổng thời gian chơi: {mm}:{ss} · 🔄 {moves} lượt lật
           </p>
           <p className="mt-1 text-xs text-neutral-500">{SAVE_TEXT[saveState]}</p>
 
           <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
             <GoldButton onClick={() => router.push('/map')}>Về bản đồ 🗺️</GoldButton>
-            <button
-              type="button"
-              onClick={onReplay}
-              className="rounded-full px-5 py-2.5 text-sm font-bold text-sky-700 underline-offset-4 hover:underline"
-            >
-              Chơi lại
-            </button>
           </div>
         </Parchment>
       </div>

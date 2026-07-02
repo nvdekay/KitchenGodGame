@@ -5,7 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { AnimatePresence, motion } from 'motion/react';
 import { usePresenceTracker } from '@/features/presence';
-import { useRunClock } from '@/features/quiz';
+import { usePlayClock } from '@/features/quiz';
 import { fireConfetti } from '@/lib/confetti';
 import { FishTimer } from '@/components/ui/game';
 import { FINALE, PUZZLE } from '../data';
@@ -45,13 +45,15 @@ export function Chang3Game({
   initialPhase?: Chang3Phase;
 }) {
   const [phase, setPhase] = useState<Chang3Phase>(initialPhase);
-  /** Remounts PuzzleBoard/KeywordPanel with fresh state on replay. */
-  const [runKey, setRunKey] = useState(0);
   const submittedRef = useRef(false);
 
   const { submit } = useChang3Sync(userId);
-  // Whole-journey clock (chặng 1 → 3); freezes at finished_at once submitted.
-  const elapsed = useRunClock(userId);
+  // Active-play clock: ticks only through the puzzle + keyword phases — the
+  // intro, victory reveal and finale don't count.
+  const inGame = phase === 'puzzle' || phase === 'keyword';
+  const { total: elapsed, stageSeconds } = usePlayClock(userId, { stageOrd: 3, running: inGame });
+  const stageSecondsRef = useRef(0);
+  stageSecondsRef.current = stageSeconds;
   usePresenceTracker({ userId, username, stage: 3 });
 
   // Warm the two images during the intro.
@@ -71,11 +73,11 @@ export function Chang3Game({
     });
   }, [phase]);
 
-  // Record the run once on victory.
+  // Record the run once on victory, with this stage's active play time.
   useEffect(() => {
     if (phase === 'victory' && !submittedRef.current) {
       submittedRef.current = true;
-      submit.mutate();
+      submit.mutate(stageSecondsRef.current);
     }
   }, [phase, submit]);
 
@@ -84,16 +86,8 @@ export function Chang3Game({
     setPhase('victory');
   };
 
-  const handleReplay = () => {
-    submittedRef.current = false;
-    setRunKey((k) => k + 1);
-    setPhase('puzzle');
-  };
-
   const saveState: SaveState =
     submit.isPending || submit.isIdle ? 'saving' : submit.data === true ? 'saved' : 'failed';
-
-  const inGame = phase === 'puzzle' || phase === 'keyword';
 
   return (
     <main className="relative h-[100dvh] w-screen overflow-hidden bg-[#4aa8ff]">
@@ -121,7 +115,7 @@ export function Chang3Game({
 
         {inGame && (
           <motion.div
-            key={`game-${runKey}`}
+            key="game"
             className="absolute inset-0 flex flex-col"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -189,7 +183,6 @@ export function Chang3Game({
             <VictoryScreen
               elapsed={elapsed}
               saveState={saveState}
-              onReplay={handleReplay}
               onFinish={() => setPhase('finale')}
             />
           </motion.div>

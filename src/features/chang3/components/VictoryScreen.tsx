@@ -10,7 +10,7 @@ export type SaveState = 'saving' | 'saved' | 'failed';
 
 const SAVE_TEXT: Record<SaveState, string> = {
   saving: 'Đang lưu tiến độ…',
-  saved: '✓ Đã lưu — bạn đã hoàn thành CẢ BA CHẶNG! Thời gian của bạn đã vào bảng xếp hạng.',
+  saved: '✓ Đã lưu, bạn đã hoàn thành CẢ BA CHẶNG! Thời gian của bạn đã vào bảng xếp hạng.',
   failed: '⚠ Chưa lưu được tiến độ lên máy chủ.',
 };
 
@@ -23,12 +23,10 @@ const SAVE_TEXT: Record<SaveState, string> = {
 export function VictoryScreen({
   elapsed,
   saveState,
-  onReplay,
   onFinish,
 }: {
   elapsed: number;
   saveState: SaveState;
-  onReplay: () => void;
   onFinish: () => void;
 }) {
   const mm = String(Math.floor(elapsed / 60)).padStart(2, '0');
@@ -114,7 +112,7 @@ export function VictoryScreen({
           </motion.p>
 
           <p className="mt-3 text-sm font-bold text-sky-800">
-            🏁 Tổng thời gian cả hành trình: {mm}:{ss}
+            🏁 Tổng thời gian chơi cả hành trình: {mm}:{ss}
           </p>
           <p className="mt-1 text-xs text-neutral-500">{SAVE_TEXT[saveState]}</p>
 
@@ -140,13 +138,6 @@ export function VictoryScreen({
                 className="h-auto w-[clamp(150px,26vw,210px)] drop-shadow-[0_10px_16px_rgba(150,90,0,0.4)]"
               />
             </motion.button>
-            <button
-              type="button"
-              onClick={onReplay}
-              className="rounded-full px-5 py-2.5 text-sm font-bold text-sky-700 underline-offset-4 hover:underline"
-            >
-              Chơi lại
-            </button>
           </div>
         </Parchment>
       </div>

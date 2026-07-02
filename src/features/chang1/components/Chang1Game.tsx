@@ -5,7 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { AnimatePresence, motion } from 'motion/react';
 import { usePresenceTracker } from '@/features/presence';
-import { useRunClock } from '@/features/quiz';
+import { usePlayClock } from '@/features/quiz';
 import { fireConfetti } from '@/lib/confetti';
 import { shuffle } from '@/utils/shuffle';
 import { QUESTIONS } from '../data';
@@ -57,8 +57,12 @@ export function Chang1Game({
   const submittedRef = useRef(false);
 
   const { submit } = useChang1Sync(userId);
-  // Whole-journey clock (chặng 1 → 3), started server-side on first stage open.
-  const elapsed = useRunClock(userId);
+  // Active-play clock: ticks only while the player is answering — not during
+  // the intro, and not while the correct-answer message is on screen.
+  const running = phase === 'playing' && feedback?.kind !== 'correct';
+  const { total: elapsed, stageSeconds } = usePlayClock(userId, { stageOrd: 1, running });
+  const stageSecondsRef = useRef(0);
+  stageSecondsRef.current = stageSeconds;
   usePresenceTracker({ userId, username, stage: 1 });
 
   const question = QUESTIONS[round.qIndex];
@@ -74,11 +78,11 @@ export function Chang1Game({
     );
   }, []);
 
-  // Record the run once on victory.
+  // Record the run once on victory (picks + this stage's active play time).
   useEffect(() => {
     if (phase === 'victory' && !submittedRef.current) {
       submittedRef.current = true;
-      submit.mutate(picksRef.current);
+      submit.mutate({ picks: picksRef.current, playSeconds: stageSecondsRef.current });
     }
   }, [phase, submit]);
 
@@ -104,13 +108,6 @@ export function Chang1Game({
       else setRound((r) => ({ qIndex: r.qIndex + 1, order: shuffledIndices(6), wrong: [] }));
     }
     setFeedback(null);
-  };
-
-  const handleReplay = () => {
-    picksRef.current = {};
-    submittedRef.current = false;
-    setRound({ qIndex: 0, order: shuffledIndices(6), wrong: [] });
-    setPhase('playing');
   };
 
   const saveState: SaveState =
@@ -201,7 +198,7 @@ export function Chang1Game({
             animate={{ opacity: 1 }}
             transition={{ duration: 0.4 }}
           >
-            <VictoryScreen elapsed={elapsed} saveState={saveState} onReplay={handleReplay} />
+            <VictoryScreen elapsed={elapsed} saveState={saveState} />
           </motion.div>
         )}
       </AnimatePresence>
