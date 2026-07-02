@@ -16,7 +16,7 @@ import { motion } from 'motion/react';
  *        (translate -50%,-50%), so the scene stays proportioned and aligned.
  *
  * Two layouts, switched purely by CSS orientation variants:
- *   • landscape / desktop → the four Táo in a row, button centred below the
+ *   • landscape / desktop → the five Táo in a row, button centred below the
  *     scroll (mirrors the original home.png).
  *   • portrait / phone    → a taller 9:16 stage with the Táo in a 2×2 grid and
  *     the button beneath, so nothing is cramped or clipped.
@@ -40,19 +40,28 @@ const TAO = [
     key: 'cam',
     src: '/home/taocam.webp',
     cls: 'left-[72%] top-[41%] w-[31%] landscape:left-[34%] landscape:top-[71.5%] landscape:w-[15.5%]',
-    delay: 0.18,
+    delay: 0.15,
+  },
+  {
+    // Slimmer sprite (aspect ~0.6) → narrower width keeps his height in line.
+    // Landscape: centre of the row, standing just behind the BẮT ĐẦU button.
+    // Portrait: the middle of the 2×2 grid — a playing-card five.
+    key: 'hong',
+    src: '/home/taohong.webp',
+    cls: 'left-1/2 top-[52%] w-[22%] landscape:top-[66.5%] landscape:w-[13%]',
+    delay: 0.3,
   },
   {
     key: 'xanhla',
     src: '/home/taoxanhla.webp',
     cls: 'left-[28%] top-[63%] w-[31%] landscape:left-[66%] landscape:top-[71.5%] landscape:w-[15.5%]',
-    delay: 0.36,
+    delay: 0.45,
   },
   {
     key: 'xanhduong',
     src: '/home/taoxanhduong.webp',
     cls: 'left-[72%] top-[63%] w-[30%] landscape:left-[83%] landscape:top-[70%] landscape:w-[15%]',
-    delay: 0.54,
+    delay: 0.6,
   },
 ] as const;
 
@@ -90,7 +99,7 @@ export function HomeSplash() {
           />
         </div>
 
-        {/* The four Táo, each bouncing out of phase */}
+        {/* The five Táo, each bouncing out of phase */}
         {TAO.map((t) => (
           <div
             key={t.key}
