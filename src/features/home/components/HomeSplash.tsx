@@ -29,38 +29,38 @@ import { motion } from 'motion/react';
 
 // Position classes carry the portrait (base) layout plus a `landscape:` override.
 // `w-*` sets the sprite width (% of stage); height is auto (native aspect kept).
+// Grouping: two Táo left of the button (đỏ, cam), three to the right
+// (hồng, xanh lá, xanh dương). Portrait mirrors it as a 2-column stack.
 const TAO = [
   {
     key: 'do',
     src: '/home/taodo.webp',
-    cls: 'left-[28%] top-[41%] w-[30%] landscape:left-[17%] landscape:top-[70%] landscape:w-[15%]',
+    cls: 'left-[28%] top-[44%] w-[30%] landscape:left-[15%] landscape:top-[70%] landscape:w-[15%]',
     delay: 0,
   },
   {
     key: 'cam',
     src: '/home/taocam.webp',
-    cls: 'left-[72%] top-[41%] w-[31%] landscape:left-[34%] landscape:top-[71.5%] landscape:w-[15.5%]',
+    cls: 'left-[72%] top-[36%] w-[27%] landscape:left-[32%] landscape:top-[71.5%] landscape:w-[15.5%]',
     delay: 0.15,
   },
   {
     // Slimmer sprite (aspect ~0.6) → narrower width keeps his height in line.
-    // Landscape: centre of the row, standing just behind the BẮT ĐẦU button.
-    // Portrait: the middle of the 2×2 grid — a playing-card five.
     key: 'hong',
     src: '/home/taohong.webp',
-    cls: 'left-1/2 top-[52%] w-[22%] landscape:top-[66.5%] landscape:w-[13%]',
+    cls: 'left-[72%] top-[52%] w-[20%] landscape:left-[60%] landscape:top-[70.5%] landscape:w-[13%]',
     delay: 0.3,
   },
   {
     key: 'xanhla',
     src: '/home/taoxanhla.webp',
-    cls: 'left-[28%] top-[63%] w-[31%] landscape:left-[66%] landscape:top-[71.5%] landscape:w-[15.5%]',
+    cls: 'left-[28%] top-[62%] w-[31%] landscape:left-[73.5%] landscape:top-[71.5%] landscape:w-[15.5%]',
     delay: 0.45,
   },
   {
     key: 'xanhduong',
     src: '/home/taoxanhduong.webp',
-    cls: 'left-[72%] top-[63%] w-[30%] landscape:left-[83%] landscape:top-[70%] landscape:w-[15%]',
+    cls: 'left-[72%] top-[68%] w-[27%] landscape:left-[87%] landscape:top-[70%] landscape:w-[15%]',
     delay: 0.6,
   },
 ] as const;
