@@ -4,7 +4,6 @@ import { useEffect, type ReactNode } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { getAuthUser } from '@/services/profile.service';
 import { useAuthStore } from '@/stores/authStore';
-import { eventBus, AppEvents } from '@/lib/eventBus';
 import { createLogger } from '@/lib/logger';
 
 const log = createLogger('provider:auth');
@@ -46,9 +45,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } = supabase.auth.onAuthStateChange((event, session) => {
       log.debug('auth state change', { event });
       void hydrate(session?.user?.id, session?.user?.email ?? null);
-      if (event === 'TOKEN_REFRESHED' && session?.user) {
-        eventBus.emit(AppEvents.SESSION_REFRESHED, { userId: session.user.id });
-      }
     });
 
     return () => {

@@ -3,7 +3,6 @@
 import { useEffect, useRef } from 'react';
 import type { RealtimeChannel } from '@supabase/supabase-js';
 import { createClient } from '@/lib/supabase/client';
-import { eventBus, AppEvents } from '@/lib/eventBus';
 import { createLogger } from '@/lib/logger';
 
 const log = createLogger('realtime');
@@ -50,11 +49,6 @@ export function useRealtimeChannel(channelName: string, options: RealtimeOptions
 
     channel.subscribe((status) => {
       log.debug('channel status', { channelName, status });
-      if (status === 'SUBSCRIBED') {
-        eventBus.emit(AppEvents.REALTIME_CONNECTED, { channel: channelName });
-      } else if (status === 'CLOSED' || status === 'CHANNEL_ERROR') {
-        eventBus.emit(AppEvents.REALTIME_DISCONNECTED, { channel: channelName });
-      }
     });
 
     return () => {

@@ -1,7 +1,6 @@
 import { createClient } from '@/lib/supabase/client';
 import { getAuthUser } from '@/services/profile.service';
 import { AppError } from '@/lib/errors';
-import { eventBus, AppEvents } from '@/lib/eventBus';
 import { createLogger } from '@/lib/logger';
 import type { AuthUser } from '@/types/auth.types';
 import type { LoginInput, SignupInput } from '../schemas/auth.schema';
@@ -55,7 +54,6 @@ export async function signIn(input: LoginInput): Promise<AuthUser> {
   });
   if (!user) throw new AppError('NOT_FOUND', 'Profile not found for this account.');
 
-  eventBus.emit(AppEvents.USER_LOGIN, { userId: user.id });
   return user;
 }
 
@@ -77,9 +75,7 @@ export async function signUp(input: SignupInput): Promise<void> {
 
 export async function signOut(): Promise<void> {
   const supabase = createClient();
-  const { data } = await supabase.auth.getUser();
   await supabase.auth.signOut();
-  eventBus.emit(AppEvents.USER_LOGOUT, { userId: data.user?.id ?? null });
 }
 
 /** Resolve the current user from an existing session, or null. */

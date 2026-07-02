@@ -9,6 +9,20 @@ const nextConfig: NextConfig = {
     // Keep server actions tight; raise only when a feature needs larger payloads.
     serverActions: { bodySizeLimit: '1mb' },
   },
+  // Game art is content-stable (files are renamed when they change), so let
+  // browsers and the Vercel CDN cache it for a year instead of revalidating
+  // every navigation — with ~50 concurrent players that skips thousands of
+  // 304 round-trips.
+  async headers() {
+    return [
+      {
+        source: '/:dir(home|map|game|chang1|chang2|chang3|end)/:path*',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
+        ],
+      },
+    ];
+  },
 };
 
 export default nextConfig;

@@ -15,8 +15,8 @@ import type { StageStatus } from '@/features/quiz';
  * /public/home) over it, each with a padlock badge:
  *   • completed stage → open padlock (unlock.webp)
  *   • not-yet-cleared → closed padlock (lock.webp)
- * Golden arrows (map/left|right.webp) fan out from the centre stage toward the
- * two side stages. Only *unlocked* stages are interactive; locked ones are
+ * Golden arrows (map/right.webp) mark the forward progression 1 → 2 → 3.
+ * Only *unlocked, not-yet-completed* stages are interactive; locked ones are
  * dimmed and can't be entered. Layout switches between a landscape row and a
  * portrait column purely via CSS orientation variants.
  */
