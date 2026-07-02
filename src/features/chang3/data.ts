@@ -52,6 +52,20 @@ export const STORY = {
   cta: 'Bắt đầu ghép hình',
 };
 
+/** Màn chúc mừng cuối game — composed from the separated /public/end layers. */
+export const FINALE = {
+  banner: '/end/banner-chuc-mung.webp',
+  button: '/end/btn-ket-thuc.webp',
+  /** Left → right like the reference art: đỏ, cam, hồng, xanh lá, xanh dương. */
+  riders: [
+    '/end/tao-do-ca-chep.webp',
+    '/end/tao-cam-ca-chep.webp',
+    '/end/tao-hong-ca-chep.webp',
+    '/end/tao-xanh-la-ca-chep.webp',
+    '/end/tao-xanh-duong-ca-chep.webp',
+  ],
+};
+
 /** Màn chiến thắng — hé lộ danh tính Táo, khép lại hành trình 3 chặng. */
 export const VICTORY = {
   heading: 'Vượt ải thành công!',

@@ -8,26 +8,30 @@ import { usePresenceTracker } from '@/features/presence';
 import { useRunClock } from '@/features/quiz';
 import { fireConfetti } from '@/lib/confetti';
 import { FishTimer } from '@/components/ui/game';
-import { PUZZLE } from '../data';
+import { FINALE, PUZZLE } from '../data';
 import { useChang3Sync } from '../hooks/useChang3Sync';
 import { PuzzleBoard } from './PuzzleBoard';
 import { KeywordPanel } from './KeywordPanel';
 import { StoryIntro } from './StoryIntro';
 import { VictoryScreen, type SaveState } from './VictoryScreen';
+import { GrandFinale } from './GrandFinale';
 
-export type Chang3Phase = 'intro' | 'puzzle' | 'keyword' | 'victory';
+export type Chang3Phase = 'intro' | 'puzzle' | 'keyword' | 'victory' | 'finale';
 
 /**
- * Chặng 3 — "Khôi phục báo cáo". The journey's finale in four phases:
+ * Chặng 3 — "Khôi phục báo cáo". The journey's finale in five phases:
  *
  *   intro   → story scroll beside drifting picture pieces
- *   puzzle  → reassemble the shattered illustration (corners pre-anchored,
- *             select a tray piece → tap its slot)
+ *   puzzle  → reassemble the shattered illustration (drag & drop, corners
+ *             pre-anchored, swap to fix wrong placements)
  *   keyword → guess the era's key phrase from the restored picture
  *             (diacritic-insensitive, no hints)
  *   victory → confetti + "Táo Tinh Gọn" reveal. Submitting the stage-3 marker
  *             also stamps quiz_runs.finished_at — freezing the whole-journey
  *             clock and entering the player into the admin leaderboard.
+ *             Its KẾT THÚC button closes the game →
+ *   finale  → the grand celebration composed from /public/end: banner scroll,
+ *             five Táo riding koi, confetti volleys, final journey time.
  *
  * `initialPhase` is a dev/testing seam (e.g. screenshot a specific phase).
  */
@@ -57,6 +61,15 @@ export function Chang3Game({
       img.src = src;
     });
   }, []);
+
+  // Warm the finale layers while the player reads the victory screen.
+  useEffect(() => {
+    if (phase !== 'victory') return;
+    [FINALE.banner, ...FINALE.riders].forEach((src) => {
+      const img = new window.Image();
+      img.src = src;
+    });
+  }, [phase]);
 
   // Record the run once on victory.
   useEffect(() => {
@@ -170,9 +183,27 @@ export function Chang3Game({
             className="absolute inset-0 overflow-y-auto"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
+            exit={{ opacity: 0, scale: 0.97 }}
             transition={{ duration: 0.4 }}
           >
-            <VictoryScreen elapsed={elapsed} saveState={saveState} onReplay={handleReplay} />
+            <VictoryScreen
+              elapsed={elapsed}
+              saveState={saveState}
+              onReplay={handleReplay}
+              onFinish={() => setPhase('finale')}
+            />
+          </motion.div>
+        )}
+
+        {phase === 'finale' && (
+          <motion.div
+            key="finale"
+            className="absolute inset-0 overflow-y-auto"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.45 }}
+          >
+            <GrandFinale elapsed={elapsed} />
           </motion.div>
         )}
       </AnimatePresence>

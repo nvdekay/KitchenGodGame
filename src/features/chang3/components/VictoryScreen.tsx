@@ -1,11 +1,10 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import { motion } from 'motion/react';
 import { fireConfetti } from '@/lib/confetti';
-import { GoldButton, Parchment } from '@/components/ui/game';
-import { KEYWORD_WORDS, VICTORY } from '../data';
+import { Parchment } from '@/components/ui/game';
+import { FINALE, KEYWORD_WORDS, VICTORY } from '../data';
 
 export type SaveState = 'saving' | 'saved' | 'failed';
 
@@ -16,21 +15,22 @@ const SAVE_TEXT: Record<SaveState, string> = {
 };
 
 /**
- * The final victory of the journey: sustained confetti, the guessed keyword,
- * the glowing green Táo, the revealed identity "Táo Tinh Gọn", the period
- * introduction, and the WHOLE-JOURNEY time (the number the admin leaderboard
- * ranks by).
+ * The stage-3 victory: sustained confetti, the guessed keyword, the glowing
+ * green Táo, the revealed identity "Táo Tinh Gọn" and the period introduction.
+ * The KẾT THÚC button (its own /public/end asset) closes the game and opens
+ * the grand finale, where the whole-journey time is stamped.
  */
 export function VictoryScreen({
   elapsed,
   saveState,
   onReplay,
+  onFinish,
 }: {
   elapsed: number;
   saveState: SaveState;
   onReplay: () => void;
+  onFinish: () => void;
 }) {
-  const router = useRouter();
   const mm = String(Math.floor(elapsed / 60)).padStart(2, '0');
   const ss = String(elapsed % 60).padStart(2, '0');
 
@@ -118,8 +118,28 @@ export function VictoryScreen({
           </p>
           <p className="mt-1 text-xs text-neutral-500">{SAVE_TEXT[saveState]}</p>
 
-          <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
-            <GoldButton onClick={() => router.push('/map')}>Về bản đồ 🗺️</GoldButton>
+          <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
+            {/* KẾT THÚC — closes the game, opens the grand finale */}
+            <motion.button
+              type="button"
+              onClick={onFinish}
+              whileHover={{ scale: 1.07 }}
+              whileTap={{ scale: 0.94 }}
+              initial={{ opacity: 0, scale: 0.6 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 1.4, type: 'spring', stiffness: 240, damping: 15 }}
+              className="outline-none focus-visible:ring-4 focus-visible:ring-amber-300/70"
+              aria-label="Kết thúc trò chơi"
+            >
+              <motion.img
+                src={FINALE.button}
+                alt="Kết thúc"
+                draggable={false}
+                animate={{ scale: [1, 1.045, 1] }}
+                transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}
+                className="h-auto w-[clamp(150px,26vw,210px)] drop-shadow-[0_10px_16px_rgba(150,90,0,0.4)]"
+              />
+            </motion.button>
             <button
               type="button"
               onClick={onReplay}
