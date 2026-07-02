@@ -22,7 +22,16 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         ← Trang chủ
       </Link>
 
-      <div className="relative z-10 mx-auto flex min-h-[100dvh] max-w-sm items-center px-4">
+      <div className="relative z-10 mx-auto flex min-h-[100dvh] max-w-sm flex-col items-center justify-center px-4 py-6">
+        {/* Game logo — the title scroll from the landing splash */}
+        <Image
+          src="/home/cactaolentrau.webp"
+          alt="Các Táo Lên Chầu"
+          width={1516}
+          height={522}
+          priority
+          className="mb-4 h-auto w-[min(78vw,320px)] drop-shadow-[0_10px_16px_rgba(0,60,120,0.3)]"
+        />
         <div className="w-full rounded-3xl border border-white/60 bg-white/85 p-6 shadow-2xl backdrop-blur-md sm:p-8">
           {children}
         </div>

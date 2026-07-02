@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { usePresenceTracker } from '@/features/presence';
-import { useStageStatuses } from '@/features/quiz';
+import { useRunClock, useStageStatuses } from '@/features/quiz';
 import { MapView } from './MapView';
 
 /**
@@ -14,6 +14,8 @@ import { MapView } from './MapView';
 export function GameMap({ userId, username }: { userId: string; username: string }) {
   const router = useRouter();
   const { data: stages, isLoading } = useStageStatuses(userId);
+  // Whole-journey clock — ticks once the player has opened chặng 1.
+  const elapsed = useRunClock(userId);
 
   // Publish presence (online, no active stage yet) for the admin dashboard.
   usePresenceTracker({ userId, username, stage: null });
@@ -22,6 +24,7 @@ export function GameMap({ userId, username }: { userId: string; username: string
     <MapView
       stages={stages ?? []}
       loading={isLoading}
+      elapsedSeconds={elapsed}
       onSelect={(ord) => router.push(`/chang/${ord}`)}
     />
   );

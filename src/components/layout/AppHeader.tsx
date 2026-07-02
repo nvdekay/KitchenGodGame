@@ -12,7 +12,7 @@ import { cn } from '@/utils/cn';
  * components/layout because it is app-chrome reused across authenticated pages;
  * it consumes the auth feature's public API for identity + sign-out.
  */
-const NAV = [{ href: '/play', label: 'Chơi' }] as const;
+const NAV = [{ href: '/map', label: 'Chơi' }] as const;
 
 export function AppHeader() {
   const pathname = usePathname();
@@ -22,8 +22,8 @@ export function AppHeader() {
   return (
     <header className="flex h-12 shrink-0 items-center justify-between border-b bg-white px-4">
       <nav className="flex items-center gap-4">
-        <Link href="/play" className="font-bold text-brand">
-          KitchenGodGame
+        <Link href="/map" className="font-bold text-brand">
+          Các Táo Lên Chầu
         </Link>
         {NAV.map((item) => (
           <Link

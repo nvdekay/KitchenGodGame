@@ -1,10 +1,15 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import { AppProviders } from '@/providers/AppProviders';
 
 export const metadata: Metadata = {
-  title: 'KitchenGodGame',
-  description: 'Browser-based game platform.',
+  title: 'Các Táo Lên Chầu',
+  description:
+    'Trò chơi vượt ải cùng các Táo: 3 chặng thử thách kiến thức trên hành trình lên chầu Ngọc Hoàng.',
+};
+
+export const viewport: Viewport = {
+  themeColor: '#4aa8ff',
 };
 
 /**

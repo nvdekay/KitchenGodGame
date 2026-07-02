@@ -4,6 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'motion/react';
 import { Spinner } from '@/components/ui/Spinner';
+import { FishTimer } from '@/components/ui/game';
 import { cn } from '@/utils/cn';
 import type { StageStatus } from '@/features/quiz';
 
@@ -49,13 +50,17 @@ const ARROWS = [
 export function MapView({
   stages,
   loading = false,
+  elapsedSeconds = 0,
   onSelect,
 }: {
   stages: StageStatus[];
   loading?: boolean;
+  /** Whole-journey clock (0 until the player has opened chặng 1). */
+  elapsedSeconds?: number;
   onSelect: (ord: number) => void;
 }) {
   const mapStages = stages.filter((s) => s.ord <= 3).sort((a, b) => a.ord - b.ord);
+  const doneCount = mapStages.filter((s) => s.completed).length;
 
   return (
     <main className="relative h-[100dvh] w-screen overflow-hidden bg-[#4aa8ff]">
@@ -68,6 +73,20 @@ export function MapView({
       >
         ← Trang chủ
       </Link>
+
+      {/* Journey progress */}
+      {!loading && mapStages.length > 0 && (
+        <span className="absolute left-1/2 top-4 z-20 -translate-x-1/2 rounded-full bg-amber-100/90 px-4 py-2 text-xs font-black tracking-wide text-amber-800 shadow-md backdrop-blur sm:text-sm">
+          🏁 {doneCount}/{mapStages.length} chặng
+        </span>
+      )}
+
+      {/* Journey clock — appears once the run has started */}
+      {elapsedSeconds > 0 && (
+        <div className="absolute right-3 top-3 z-20 w-[clamp(88px,10vw,130px)] sm:right-4">
+          <FishTimer seconds={elapsedSeconds} />
+        </div>
+      )}
 
       {loading && (
         <div className="absolute inset-0 z-10 flex items-center justify-center">
