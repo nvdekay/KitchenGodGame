@@ -245,8 +245,9 @@ export function Chang2Game({
               </div>
             </div>
 
-            {/* Board */}
-            <div className="relative z-10 flex-1 overflow-y-auto landscape:flex landscape:items-center landscape:justify-center landscape:overflow-visible">
+            {/* Board — m-auto centres it when it fits; the area scrolls when it
+                doesn't (short landscape phones), instead of shrinking cards to dust. */}
+            <div className="relative z-10 flex flex-1 overflow-y-auto">
               <MemoryBoard
                 board={board}
                 faceUp={faceUp}

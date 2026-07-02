@@ -26,7 +26,7 @@ export function MemoryBoard({
   onFlip: (card: BoardCard) => void;
 }) {
   return (
-    <div className="mx-auto grid w-full max-w-md grid-cols-3 gap-2 px-3 pb-24 pt-2 sm:gap-3 landscape:max-w-none landscape:w-[min(94vw,72rem,calc((100dvh-13rem)*1.45))] landscape:grid-cols-7 landscape:pb-2">
+    <div className="m-auto grid w-full max-w-md grid-cols-3 gap-2 px-3 py-3 sm:gap-3 landscape:max-w-none landscape:w-[min(94vw,72rem,calc(max(100dvh_-_13rem,26rem)*1.45))] landscape:grid-cols-7">
       {board.map((card, i) => {
         const img =
           card.kind === 'pair' ? pairById.get(card.refId)?.img : memeById.get(card.refId)?.img;

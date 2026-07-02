@@ -133,8 +133,9 @@ export function Chang3Game({
               </div>
             </div>
 
-            {/* Stage area */}
-            <div className="relative z-10 flex-1 overflow-y-auto px-3 pb-4 pt-2 sm:px-5">
+            {/* Stage area — m-auto centres when it fits; scrolls on short screens
+                (the width floor keeps the board draggable instead of dust-sized). */}
+            <div className="relative z-10 flex flex-1 overflow-y-auto px-3 pb-4 pt-2 sm:px-5">
               <AnimatePresence mode="wait">
                 {phase === 'puzzle' ? (
                   <motion.div
@@ -143,7 +144,7 @@ export function Chang3Game({
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.98 }}
                     transition={{ duration: 0.35 }}
-                    className="mx-auto w-[min(100%,54rem,calc((100dvh-16rem)*1.508))]"
+                    className="m-auto w-[min(100%,54rem,calc(max(100dvh_-_16rem,24rem)*1.508))]"
                   >
                     <PuzzleBoard onComplete={() => setPhase('keyword')} />
                   </motion.div>
@@ -153,6 +154,7 @@ export function Chang3Game({
                     initial={{ opacity: 0, y: 24 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.4 }}
+                    className="m-auto w-full"
                   >
                     <KeywordPanel onSolved={handleKeywordSolved} />
                   </motion.div>
