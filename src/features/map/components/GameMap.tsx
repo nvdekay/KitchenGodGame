@@ -8,10 +8,8 @@ import { MapView } from './MapView';
 /**
  * Data wrapper for the stage-select map. Reads live lock/unlock state for the
  * signed-in player (stages 1–3 + their completions), publishes presence, and
- * hands the presentational MapView a stage list + a select handler.
- *
- * NOTE: selecting an unlocked stage currently routes to /play (the existing
- * quiz). This is the seam for the per-stage play flow to be wired next.
+ * hands the presentational MapView a stage list + a select handler. Selecting
+ * an unlocked stage enters its game at /chang/[ord].
  */
 export function GameMap({ userId, username }: { userId: string; username: string }) {
   const router = useRouter();
@@ -20,5 +18,11 @@ export function GameMap({ userId, username }: { userId: string; username: string
   // Publish presence (online, no active stage yet) for the admin dashboard.
   usePresenceTracker({ userId, username, stage: null });
 
-  return <MapView stages={stages ?? []} loading={isLoading} onSelect={() => router.push('/play')} />;
+  return (
+    <MapView
+      stages={stages ?? []}
+      loading={isLoading}
+      onSelect={(ord) => router.push(`/chang/${ord}`)}
+    />
+  );
 }

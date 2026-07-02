@@ -101,6 +101,8 @@ export function MapView({
           const layout = STAGE_LAYOUT[s.ord];
           if (!layout) return null;
           const badge = s.completed ? '/map/unlock.webp' : '/map/lock.webp';
+          // "Chặng 1: Hồ sơ thất lạc" → big "Chặng 1" + small subtitle line.
+          const [titleMain, titleSub] = s.title.split(/:\s*/);
 
           return (
             <div key={s.ord} className={cn('absolute -translate-x-1/2 -translate-y-1/2', layout.cls)}>
@@ -138,8 +140,13 @@ export function MapView({
 
               {/* Stage label */}
               <p className="mt-1 text-center text-sm font-bold text-sky-900 drop-shadow-[0_1px_2px_rgba(255,255,255,0.8)] sm:text-base landscape:mt-2">
-                {s.title}
+                {titleMain}
               </p>
+              {titleSub && (
+                <p className="text-center text-[11px] font-semibold text-sky-800/90 drop-shadow-[0_1px_2px_rgba(255,255,255,0.8)] sm:text-xs">
+                  {titleSub}
+                </p>
+              )}
             </div>
           );
         })}
