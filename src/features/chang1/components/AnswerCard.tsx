@@ -6,7 +6,7 @@ import { cn } from '@/utils/cn';
 /**
  * One hanging wooden sign in the marquee. The rope is part of the sprite, so
  * the idle sway rotates around the rope anchor (origin-top). The label sits
- * inside khung.webp's measured cream board area (L9.7 T30.4 R89.5 B79.8 %).
+ * inside answer-card.webp's measured cream board area (L9.7 T30.4 R89.5 B79.8 %).
  * A wrong pick greys the card out with a ❌ stamp and disables it.
  */
 export function AnswerCard({
@@ -50,7 +50,7 @@ export function AnswerCard({
         }}
       >
         <motion.img
-          src="/chang1/khung.webp"
+          src="/chang1/answer-card.webp"
           alt=""
           draggable={false}
           className={cn(

@@ -64,7 +64,7 @@ export function Chang1Game({
 
   // Warm the sprite cache during the intro so the playfield pops in complete.
   useEffect(() => {
-    ['/chang1/khung.webp', '/game/ca-thoi-gian.webp', '/chang1/tao-cham-hoi.webp'].forEach(
+    ['/chang1/answer-card.webp', '/game/ca-thoi-gian.webp', '/chang1/tao-cham-hoi.webp'].forEach(
       (src) => {
         const img = new window.Image();
         img.src = src;
