@@ -42,8 +42,8 @@ const STAGE_LAYOUT: Record<number, { tao: string; cls: string; delay: number }> 
 // Directional arrows (landscape only) — both point right, showing the forward
 // progression 1 → 2 → 3 (one between each pair of stages).
 const ARROWS = [
-  { src: '/map/right.webp', cls: 'left-[34%] top-[57%] w-[13%]', x: [-3, 5], delay: 0 },
-  { src: '/map/right.webp', cls: 'left-[66%] top-[57%] w-[13%]', x: [-3, 5], delay: 0.4 },
+  { id: '1-2', src: '/map/right.webp', cls: 'left-[34%] top-[57%] w-[13%]', x: [-3, 5], delay: 0 },
+  { id: '2-3', src: '/map/right.webp', cls: 'left-[66%] top-[57%] w-[13%]', x: [-3, 5], delay: 0.4 },
 ] as const;
 
 export function MapView({
@@ -82,7 +82,7 @@ export function MapView({
           mapStages.length > 0 &&
           ARROWS.map((a) => (
             <div
-              key={a.src}
+              key={a.id}
               className={cn('absolute hidden -translate-x-1/2 -translate-y-1/2 landscape:block', a.cls)}
             >
               <motion.img
