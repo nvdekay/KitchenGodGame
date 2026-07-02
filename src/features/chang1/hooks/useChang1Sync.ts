@@ -23,8 +23,11 @@ export function useChang1Sync(userId: string) {
     mutationFn: (picks: Record<number, number>) =>
       ids.data ? svc.submitRun(ids.data, picks) : Promise.resolve(false),
     onSuccess: (passed) => {
-      // Refresh stage statuses so /map unlocks chặng 2 without a reload.
-      if (passed) qc.invalidateQueries({ queryKey: ['quiz', 'stages', userId] });
+      if (passed) {
+        // Unlock chặng 2 on the map + keep the run clock in sync.
+        qc.invalidateQueries({ queryKey: ['quiz', 'stages', userId] });
+        qc.invalidateQueries({ queryKey: ['quiz', 'run', userId] });
+      }
     },
   });
 

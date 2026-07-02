@@ -58,15 +58,20 @@ export function GoldButton({ className, children, ...props }: HTMLMotionProps<'b
 /**
  * Golden "Thời gian" fish with the elapsed run time inside its white box
  * (measured region of /game/ca-thoi-gian.webp: L12.9 T33.6 R79.3 B71.6 %).
- * The parent supplies size/position via a wrapping element.
+ * The parent supplies size/position via a wrapping element. The wrapper is a
+ * CSS size container so the digits scale with the FISH (cqw), never the
+ * viewport — no overflow whether the fish renders at 84px or 200px, and the
+ * font steps down for runs past 99 minutes.
  */
 export function FishTimer({ seconds }: { seconds: number }) {
   const mm = String(Math.floor(seconds / 60)).padStart(2, '0');
   const ss = String(seconds % 60).padStart(2, '0');
+  const time = `${mm}:${ss}`;
 
   return (
     <motion.div
       className="relative"
+      style={{ containerType: 'inline-size' }}
       animate={{ y: [0, -6, 0] }}
       transition={{ duration: 3.2, repeat: Infinity, ease: 'easeInOut' }}
     >
@@ -77,11 +82,17 @@ export function FishTimer({ seconds }: { seconds: number }) {
         className="h-auto w-full drop-shadow-[0_8px_12px_rgba(10,60,120,0.3)]"
       />
       <span
-        className="absolute flex items-center justify-center font-black tabular-nums text-amber-900"
-        style={{ left: '14%', right: '22%', top: '36%', bottom: '31%', fontSize: 'clamp(15px,2vw,32px)' }}
+        className="absolute flex items-center justify-center font-black tabular-nums leading-none text-amber-900"
+        style={{
+          left: '14%',
+          right: '22%',
+          top: '36%',
+          bottom: '31%',
+          fontSize: `clamp(10px, ${time.length > 5 ? 14 : 17}cqw, 30px)`,
+        }}
         aria-label={`Thời gian: ${mm} phút ${ss} giây`}
       >
-        {mm}:{ss}
+        {time}
       </span>
     </motion.div>
   );

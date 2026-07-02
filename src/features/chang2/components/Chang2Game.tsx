@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { AnimatePresence, motion } from 'motion/react';
 import { usePresenceTracker } from '@/features/presence';
+import { useRunClock } from '@/features/quiz';
 import { fireConfetti } from '@/lib/confetti';
 import { FishTimer } from '@/components/ui/game';
 import { cn } from '@/utils/cn';
@@ -66,11 +67,12 @@ export function Chang2Game({
   const [reveal, setReveal] = useState<Reveal | null>(null);
   const [busy, setBusy] = useState(false);
   const [moves, setMoves] = useState(0);
-  const [elapsed, setElapsed] = useState(0);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const submittedRef = useRef(false);
 
   const { submit } = useChang2Sync(userId);
+  // Whole-journey clock (chặng 1 → 3), started server-side on first stage open.
+  const elapsed = useRunClock(userId);
   usePresenceTracker({ userId, username, stage: 2 });
 
   // Warm every card image during the intro so flips reveal instantly.
@@ -86,13 +88,6 @@ export function Chang2Game({
       img.src = src;
     });
   }, []);
-
-  // Run clock.
-  useEffect(() => {
-    if (phase !== 'playing') return;
-    const t = setInterval(() => setElapsed((s) => s + 1), 1000);
-    return () => clearInterval(t);
-  }, [phase]);
 
   // Record the run once on victory.
   useEffect(() => {
@@ -168,7 +163,6 @@ export function Chang2Game({
     setReveal(null);
     setBusy(false);
     setMoves(0);
-    setElapsed(0);
     setPhase('playing');
   };
 

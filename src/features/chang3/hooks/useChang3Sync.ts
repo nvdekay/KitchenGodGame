@@ -3,21 +3,20 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { fetchStageMarkerId, submitStageMarker } from '@/features/quiz';
 
-const STAGE_ORD = 2;
+const STAGE_ORD = 3;
 
 /**
- * Server sync for a chặng-2 run, via the shared completion-marker plumbing
- * (see quiz/services/stage-marker.service): the marker id is fetched up front
- * (which also stamps the run's started_at server-side); clearing the board
- * submits it once. When the marker is unavailable (offline / migration 0007
- * not applied) the submit resolves false — the game still plays, it just
- * reports that progress wasn't saved.
+ * Server sync for a chặng-3 run, via the shared completion-marker plumbing.
+ * Stage 3 is the LAST stage, so a successful submit also stamps the run's
+ * finished_at — freezing the journey clock and entering the player into the
+ * admin leaderboard. Unavailable marker (offline / migration 0008 not applied)
+ * → the game still plays, it just reports that progress wasn't saved.
  */
-export function useChang2Sync(userId: string) {
+export function useChang3Sync(userId: string) {
   const qc = useQueryClient();
 
   const marker = useQuery({
-    queryKey: ['chang2', 'marker-id'],
+    queryKey: ['chang3', 'marker-id'],
     queryFn: () => fetchStageMarkerId(STAGE_ORD),
     staleTime: Infinity,
   });
@@ -27,7 +26,7 @@ export function useChang2Sync(userId: string) {
       marker.data ? submitStageMarker(STAGE_ORD, marker.data) : Promise.resolve(false),
     onSuccess: (passed) => {
       if (passed) {
-        // Unlock chặng 3 on the map + keep the run clock in sync.
+        // Refresh map statuses + freeze the run clock at the server's finished_at.
         qc.invalidateQueries({ queryKey: ['quiz', 'stages', userId] });
         qc.invalidateQueries({ queryKey: ['quiz', 'run', userId] });
       }

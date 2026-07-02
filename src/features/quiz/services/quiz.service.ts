@@ -24,6 +24,20 @@ export async function getMyCompletions(
   return (data ?? []).map((r) => ({ stageOrd: r.stage_ord, completedAt: r.completed_at }));
 }
 
+/** The player's run timestamps (started on first stage open, finished after the
+ *  last stage) — the source of the whole-journey clock and the admin ranking. */
+export async function getMyRun(
+  db: TypedSupabaseClient,
+  userId: string,
+): Promise<{ startedAt: string | null; finishedAt: string | null }> {
+  const { data } = await db
+    .from('quiz_runs')
+    .select('started_at,finished_at')
+    .eq('user_id', userId)
+    .maybeSingle();
+  return { startedAt: data?.started_at ?? null, finishedAt: data?.finished_at ?? null };
+}
+
 export async function getStage(db: TypedSupabaseClient, ord: number): Promise<StageData> {
   const { data, error } = await db.rpc('get_stage', { p_ord: ord });
   if (error) {

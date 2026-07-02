@@ -105,7 +105,7 @@ export function VictoryScreen({
           </motion.p>
 
           <p className="mt-3 text-sm font-bold text-sky-800">
-            ⏱ Hoàn thành trong {mm}:{ss} · 🔄 {moves} lượt lật
+            ⏱ Tổng thời gian hành trình: {mm}:{ss} · 🔄 {moves} lượt lật
           </p>
           <p className="mt-1 text-xs text-neutral-500">{SAVE_TEXT[saveState]}</p>
 

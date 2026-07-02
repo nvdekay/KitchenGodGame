@@ -5,20 +5,21 @@ import { useRouter } from 'next/navigation';
 import { motion } from 'motion/react';
 import { fireConfetti } from '@/lib/confetti';
 import { GoldButton, Parchment } from '@/components/ui/game';
-import { VICTORY } from '../data';
+import { KEYWORD_WORDS, VICTORY } from '../data';
 
 export type SaveState = 'saving' | 'saved' | 'failed';
 
 const SAVE_TEXT: Record<SaveState, string> = {
   saving: 'Đang lưu tiến độ…',
-  saved: '✓ Tiến độ đã lưu — Chặng 2 đã mở khóa!',
+  saved: '✓ Đã lưu — bạn đã hoàn thành CẢ BA CHẶNG! Thời gian của bạn đã vào bảng xếp hạng.',
   failed: '⚠ Chưa lưu được tiến độ lên máy chủ.',
 };
 
 /**
- * Victory reveal: sustained confetti, the glowing Táo (no more question
- * marks — he found his report), the unlocked identity "Táo Hội Nhập", the
- * period introduction, the run time, and the server save status.
+ * The final victory of the journey: sustained confetti, the guessed keyword,
+ * the glowing green Táo, the revealed identity "Táo Tinh Gọn", the period
+ * introduction, and the WHOLE-JOURNEY time (the number the admin leaderboard
+ * ranks by).
  */
 export function VictoryScreen({
   elapsed,
@@ -57,8 +58,18 @@ export function VictoryScreen({
             {VICTORY.heading}
           </motion.h1>
 
+          {/* The guessed keyword, stamped */}
+          <motion.p
+            initial={{ scale: 1.6, opacity: 0, rotate: -6 }}
+            animate={{ scale: 1, opacity: 1, rotate: 0 }}
+            transition={{ delay: 0.25, type: 'spring', stiffness: 260, damping: 15 }}
+            className="mx-auto mt-2 inline-block rounded-xl border-2 border-red-400 px-4 py-1.5 text-lg font-black tracking-widest text-red-500 sm:text-xl"
+          >
+            {KEYWORD_WORDS.join(' ')}
+          </motion.p>
+
           {/* Glowing Táo reveal */}
-          <div className="relative mx-auto mt-3 h-[clamp(140px,22vh,220px)] w-[clamp(140px,22vh,220px)]">
+          <div className="relative mx-auto mt-3 h-[clamp(130px,20vh,210px)] w-[clamp(130px,20vh,210px)]">
             <motion.div
               aria-hidden
               className="absolute inset-[-18%] rounded-full bg-[radial-gradient(circle,rgba(255,214,90,0.85),rgba(255,214,90,0)_70%)]"
@@ -66,12 +77,12 @@ export function VictoryScreen({
               transition={{ duration: 2.6, repeat: Infinity, ease: 'easeInOut' }}
             />
             <motion.img
-              src="/home/taodo.webp"
-              alt="Táo Hội Nhập"
+              src="/home/taoxanhla.webp"
+              alt="Táo Tinh Gọn"
               draggable={false}
               initial={{ scale: 0, rotate: -12 }}
               animate={{ scale: 1, rotate: 0 }}
-              transition={{ delay: 0.35, type: 'spring', stiffness: 200, damping: 14 }}
+              transition={{ delay: 0.4, type: 'spring', stiffness: 200, damping: 14 }}
               className="relative h-full w-full object-contain drop-shadow-[0_14px_20px_rgba(120,60,0,0.35)]"
             />
           </div>
@@ -82,7 +93,7 @@ export function VictoryScreen({
             transition={{ delay: 0.7 }}
             className="mt-1 text-xs font-bold uppercase tracking-widest text-amber-700"
           >
-            {VICTORY.unlockLabel}
+            🏛️ {VICTORY.unlockLabel}
           </motion.p>
           <motion.h2
             initial={{ scale: 0.4, opacity: 0 }}
@@ -103,7 +114,7 @@ export function VictoryScreen({
           </motion.p>
 
           <p className="mt-3 text-sm font-bold text-sky-800">
-            ⏱ Tổng thời gian hành trình: {mm}:{ss}
+            🏁 Tổng thời gian cả hành trình: {mm}:{ss}
           </p>
           <p className="mt-1 text-xs text-neutral-500">{SAVE_TEXT[saveState]}</p>
 
