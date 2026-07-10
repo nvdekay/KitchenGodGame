@@ -72,7 +72,7 @@ export function LoginForm({
         </p>
       )}
 
-      <Button type="submit" disabled={isSubmitting || signIn.isPending}>
+      <Button type="submit" loading={isSubmitting || signIn.isPending}>
         {signIn.isPending ? 'Đang đăng nhập…' : 'Đăng nhập'}
       </Button>
 

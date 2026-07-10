@@ -1,8 +1,10 @@
 'use client';
 
+import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'motion/react';
+import { GameLoadingOverlay } from '@/components/ui/game';
 
 /**
  * Landing splash — "Các Táo Lên Chầu".
@@ -48,19 +50,19 @@ const TAO = [
     // Slimmer sprite (aspect ~0.6) → narrower width keeps his height in line.
     key: 'hong',
     src: '/home/taohong.webp',
-    cls: 'left-[72%] top-[52%] w-[20%] landscape:left-[60%] landscape:top-[70.5%] landscape:w-[13%]',
+    cls: 'left-[72%] top-[52%] w-[20%] landscape:left-[63.5%] landscape:top-[70.5%] landscape:w-[13%]',
     delay: 0.3,
   },
   {
     key: 'xanhla',
     src: '/home/taoxanhla.webp',
-    cls: 'left-[28%] top-[62%] w-[31%] landscape:left-[73.5%] landscape:top-[71.5%] landscape:w-[15.5%]',
+    cls: 'left-[28%] top-[62%] w-[31%] landscape:left-[76%] landscape:top-[71.5%] landscape:w-[15.5%]',
     delay: 0.45,
   },
   {
     key: 'xanhduong',
     src: '/home/taoxanhduong.webp',
-    cls: 'left-[72%] top-[68%] w-[27%] landscape:left-[87%] landscape:top-[70%] landscape:w-[15%]',
+    cls: 'left-[72%] top-[68%] w-[27%] landscape:left-[88.5%] landscape:top-[70%] landscape:w-[15%]',
     delay: 0.6,
   },
 ] as const;
@@ -68,6 +70,8 @@ const TAO = [
 const TAO_SHADOW = 'drop-shadow-[0_12px_14px_rgba(0,70,140,0.28)]';
 
 export function HomeSplash() {
+  // Set on BẮT ĐẦU click — instant loading feedback while /map resolves.
+  const [entering, setEntering] = useState(false);
   // Idle bounce for a Táo: hop up ~7% of its own height on a gentle loop.
   const bounce = (delay: number) => ({
     animate: { y: ['0%', '-7%', '0%'] },
@@ -117,7 +121,12 @@ export function HomeSplash() {
 
         {/* Start button → /play */}
         <div className="absolute left-1/2 top-[85%] w-[44%] -translate-x-1/2 -translate-y-1/2 landscape:top-[83%] landscape:w-[21%]">
-          <Link href="/map" aria-label="Bắt đầu chơi" className="block outline-none">
+          <Link
+            href="/map"
+            aria-label="Bắt đầu chơi"
+            className="block outline-none"
+            onClick={() => setEntering(true)}
+          >
             <motion.img
               src="/home/startbutton.webp"
               alt="Bắt đầu"
@@ -130,6 +139,8 @@ export function HomeSplash() {
           </Link>
         </div>
       </div>
+
+      {entering && <GameLoadingOverlay label="Đang mở bản đồ" />}
     </main>
   );
 }

@@ -35,23 +35,111 @@ export function Parchment({
   );
 }
 
-/** Big golden game CTA. */
-export function GoldButton({ className, children, ...props }: HTMLMotionProps<'button'>) {
+/**
+ * Big golden game CTA. `loading` swaps in a spinning koi-gold ring, keeps the
+ * label visible and disables the button — feedback for async actions
+ * (navigation, saving) without the layout jumping.
+ */
+export function GoldButton({
+  className,
+  children,
+  loading = false,
+  disabled,
+  ...props
+}: Omit<HTMLMotionProps<'button'>, 'children'> & {
+  loading?: boolean;
+  children?: React.ReactNode;
+}) {
   return (
     <motion.button
       type="button"
-      whileHover={{ scale: 1.05 }}
-      whileTap={{ scale: 0.93 }}
+      whileHover={loading ? undefined : { scale: 1.05 }}
+      whileTap={loading ? undefined : { scale: 0.93 }}
+      disabled={disabled || loading}
       className={cn(
         'rounded-full border-2 border-amber-200/80 bg-gradient-to-b from-amber-300 via-amber-400 to-amber-500',
         'px-8 py-3 text-base font-extrabold text-amber-950 shadow-[0_8px_20px_rgba(180,120,0,0.4)]',
         'outline-none transition-[filter] hover:brightness-105 focus-visible:ring-4 focus-visible:ring-amber-300/60',
+        'disabled:cursor-not-allowed',
+        loading && 'brightness-95',
         className,
       )}
       {...props}
     >
-      {children}
+      <span className="inline-flex items-center justify-center gap-2">
+        {loading && (
+          <span
+            aria-hidden
+            className="h-4 w-4 shrink-0 animate-spin rounded-full border-2 border-amber-900/25 border-t-amber-900"
+          />
+        )}
+        {children}
+      </span>
     </motion.button>
+  );
+}
+
+// The three Táo who take turns hopping in the shared loader.
+const LOADER_TAO = ['/home/taodo.webp', '/home/taocam.webp', '/home/taoxanhla.webp'] as const;
+
+/**
+ * Game-styled loader: three Táo hopping out of phase (same idle bounce as the
+ * splash) above a golden pill label with a trailing animated ellipsis. Drop it
+ * inline wherever a plain spinner would break the world.
+ */
+export function TaoLoader({ label = 'Đang tải' }: { label?: string }) {
+  return (
+    <div role="status" aria-label={label} className="flex flex-col items-center gap-4">
+      <div className="flex items-end gap-3">
+        {LOADER_TAO.map((src, i) => (
+          <motion.img
+            key={src}
+            src={src}
+            alt=""
+            aria-hidden
+            draggable={false}
+            className="h-auto w-12 drop-shadow-[0_10px_12px_rgba(0,60,120,0.3)] sm:w-14"
+            animate={{ y: [0, -14, 0] }}
+            transition={{ duration: 0.9, repeat: Infinity, ease: 'easeInOut', delay: i * 0.18 }}
+          />
+        ))}
+      </div>
+      <p
+        className={cn(
+          'rounded-full border-2 border-amber-200/80 bg-gradient-to-b from-amber-300 via-amber-400 to-amber-500',
+          'px-6 py-2 text-sm font-extrabold text-amber-950 shadow-[0_8px_20px_rgba(180,120,0,0.35)]',
+        )}
+      >
+        {label}
+        {[0, 1, 2].map((i) => (
+          <motion.span
+            key={i}
+            aria-hidden
+            animate={{ opacity: [0.2, 1, 0.2] }}
+            transition={{ duration: 1.2, repeat: Infinity, ease: 'easeInOut', delay: i * 0.2 }}
+          >
+            .
+          </motion.span>
+        ))}
+      </p>
+    </div>
+  );
+}
+
+/**
+ * Full-screen game loader: frosted sky veil + TaoLoader, above everything.
+ * Shown between click and route change so every navigation answers instantly.
+ */
+export function GameLoadingOverlay({ label }: { label?: string }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.18 }}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-sky-200/45 backdrop-blur-[3px]"
+    >
+      <TaoLoader label={label} />
+    </motion.div>
   );
 }
 

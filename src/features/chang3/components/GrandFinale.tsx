@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'motion/react';
 import { fireConfetti } from '@/lib/confetti';
@@ -16,8 +16,16 @@ import { FINALE } from '../data';
  */
 export function GrandFinale({ elapsed }: { elapsed: number }) {
   const router = useRouter();
+  // Which nav button was pressed — locks both while the route resolves.
+  const [leaving, setLeaving] = useState<'home' | 'map' | null>(null);
   const mm = String(Math.floor(elapsed / 60)).padStart(2, '0');
   const ss = String(elapsed % 60).padStart(2, '0');
+
+  const leave = (dest: 'home' | 'map') => {
+    if (leaving) return;
+    setLeaving(dest);
+    router.push(dest === 'home' ? '/' : '/map');
+  };
 
   // A volley of celebration bursts as the screen assembles.
   useEffect(() => {
@@ -92,12 +100,21 @@ export function GrandFinale({ elapsed }: { elapsed: number }) {
         transition={{ delay: 1.6, duration: 0.5 }}
         className="mt-2 flex flex-wrap items-center justify-center gap-3"
       >
-        <GoldButton onClick={() => router.push('/')}>Về trang chủ 🏠</GoldButton>
+        <GoldButton loading={leaving === 'home'} onClick={() => leave('home')}>
+          Về trang chủ 🏠
+        </GoldButton>
         <button
           type="button"
-          onClick={() => router.push('/map')}
-          className="rounded-full px-5 py-2.5 text-sm font-bold text-sky-800 underline-offset-4 hover:underline"
+          disabled={leaving !== null}
+          onClick={() => leave('map')}
+          className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-bold text-sky-800 underline-offset-4 hover:underline disabled:cursor-not-allowed disabled:opacity-70"
         >
+          {leaving === 'map' && (
+            <span
+              aria-hidden
+              className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-sky-800/25 border-t-sky-800"
+            />
+          )}
           Về bản đồ 🗺️
         </button>
       </motion.div>

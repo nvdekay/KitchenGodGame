@@ -73,7 +73,7 @@ export function SignupForm() {
         </p>
       )}
 
-      <Button type="submit" disabled={isSubmitting || signUp.isPending}>
+      <Button type="submit" loading={isSubmitting || signUp.isPending}>
         {signUp.isPending ? 'Đang tạo tài khoản…' : 'Đăng ký'}
       </Button>
 

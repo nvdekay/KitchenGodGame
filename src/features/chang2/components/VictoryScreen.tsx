@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'motion/react';
 import { fireConfetti } from '@/lib/confetti';
@@ -30,6 +30,7 @@ export function VictoryScreen({
   saveState: SaveState;
 }) {
   const router = useRouter();
+  const [leaving, setLeaving] = useState(false);
   const mm = String(Math.floor(elapsed / 60)).padStart(2, '0');
   const ss = String(elapsed % 60).padStart(2, '0');
 
@@ -108,7 +109,15 @@ export function VictoryScreen({
           <p className="mt-1 text-xs text-neutral-500">{SAVE_TEXT[saveState]}</p>
 
           <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
-            <GoldButton onClick={() => router.push('/map')}>Về bản đồ 🗺️</GoldButton>
+            <GoldButton
+              loading={leaving}
+              onClick={() => {
+                setLeaving(true);
+                router.push('/map');
+              }}
+            >
+              Về bản đồ 🗺️
+            </GoldButton>
           </div>
         </Parchment>
       </div>

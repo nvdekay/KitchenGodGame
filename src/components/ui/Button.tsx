@@ -10,6 +10,8 @@ type Variant = 'primary' | 'secondary' | 'ghost';
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: Variant;
+  /** Shows an inline spinner and disables the button. */
+  loading?: boolean;
 }
 
 const VARIANTS: Record<Variant, string> = {
@@ -19,18 +21,27 @@ const VARIANTS: Record<Variant, string> = {
 };
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant = 'primary', ...props }, ref) => (
+  ({ className, variant = 'primary', loading = false, disabled, children, ...props }, ref) => (
     <button
       ref={ref}
+      disabled={disabled || loading}
       className={cn(
-        'inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition',
+        'inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition',
         'active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/50 focus-visible:ring-offset-2',
         'disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100',
         VARIANTS[variant],
         className,
       )}
       {...props}
-    />
+    >
+      {loading && (
+        <span
+          aria-hidden
+          className="h-4 w-4 shrink-0 animate-spin rounded-full border-2 border-current border-t-transparent"
+        />
+      )}
+      {children}
+    </button>
   ),
 );
 Button.displayName = 'Button';

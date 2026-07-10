@@ -1,10 +1,10 @@
 'use client';
 
+import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'motion/react';
-import { Spinner } from '@/components/ui/Spinner';
-import { FishTimer } from '@/components/ui/game';
+import { FishTimer, GameLoadingOverlay, TaoLoader } from '@/components/ui/game';
 import { cn } from '@/utils/cn';
 import type { StageStatus } from '@/features/quiz';
 
@@ -51,14 +51,19 @@ export function MapView({
   stages,
   loading = false,
   elapsedSeconds = 0,
+  enteringOrd = null,
   onSelect,
 }: {
   stages: StageStatus[];
   loading?: boolean;
   /** Whole-journey clock (0 until the player has opened chặng 1). */
   elapsedSeconds?: number;
+  /** Stage being navigated to — locks the map and shows an entering overlay. */
+  enteringOrd?: number | null;
   onSelect: (ord: number) => void;
 }) {
+  const [leavingHome, setLeavingHome] = useState(false);
+  const entering = enteringOrd !== null;
   const mapStages = stages.filter((s) => s.ord <= 3).sort((a, b) => a.ord - b.ord);
   const doneCount = mapStages.filter((s) => s.completed).length;
 
@@ -69,6 +74,7 @@ export function MapView({
       {/* Back to landing */}
       <Link
         href="/"
+        onClick={() => setLeavingHome(true)}
         className="absolute left-4 top-4 z-20 rounded-full bg-white/80 px-4 py-2 text-sm font-semibold text-sky-700 shadow-md backdrop-blur transition hover:bg-white"
       >
         ← Trang chủ
@@ -90,9 +96,13 @@ export function MapView({
 
       {loading && (
         <div className="absolute inset-0 z-10 flex items-center justify-center">
-          <Spinner />
+          <TaoLoader label="Đang tải bản đồ" />
         </div>
       )}
+
+      {/* Instant feedback while the stage route loads — also blocks re-taps */}
+      {entering && <GameLoadingOverlay label={`Đang vào Chặng ${enteringOrd}`} />}
+      {leavingHome && !entering && <GameLoadingOverlay label="Đang về trang chủ" />}
 
       {/* Centred, viewport-fitted stage — 9:16 portrait, 16:9 landscape */}
       <div className="absolute left-1/2 top-1/2 aspect-[9/16] w-[min(100vw,calc(100dvh*9/16))] -translate-x-1/2 -translate-y-1/2 landscape:aspect-[16/9] landscape:w-[min(100vw,calc(100dvh*16/9))]">
@@ -129,7 +139,7 @@ export function MapView({
             <div key={s.ord} className={cn('absolute -translate-x-1/2 -translate-y-1/2', layout.cls)}>
               <button
                 type="button"
-                disabled={!playable}
+                disabled={!playable || entering}
                 onClick={() => playable && onSelect(s.ord)}
                 aria-label={`${s.title}${s.completed ? ' — đã hoàn thành' : s.unlocked ? '' : ' — chưa mở khoá'}`}
                 className={cn(
@@ -154,6 +164,7 @@ export function MapView({
                     !s.unlocked && 'opacity-70 brightness-90 grayscale-[0.85]',
                   )}
                   whileHover={playable ? { scale: 1.06 } : undefined}
+                  whileTap={playable ? { scale: 0.92 } : undefined}
                   {...(s.unlocked
                     ? {
                         animate: { y: ['0%', '-7%', '0%'] },
