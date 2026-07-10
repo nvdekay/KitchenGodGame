@@ -103,7 +103,7 @@ export const STORY = {
   howto: [
     '🔄 Mỗi lượt lật 2 thẻ',
     '🃏 Hai thẻ giống nhau = ghép được 1 cặp',
-    '⏸️ Ghép đúng: đồng hồ tạm dừng 15 giây để bạn đọc nội dung',
+    '⏸️ Ghép đúng: đồng hồ tạm dừng 10 giây để bạn đọc nội dung',
     '😵 Coi chừng 5 thẻ meme: dính là choáng 6 giây, đồng hồ vẫn chạy!',
   ],
   cta: 'Bắt đầu khôi phục',

@@ -10,14 +10,14 @@ export type Reveal = { type: 'pair'; pair: PairDef } | { type: 'meme'; meme: Mem
 
 /**
  * Post-flip pop-up, with a read-lock so it can't be clicked through:
- *   • matched pair → educational card, locked 15s while the clock is PAUSED
+ *   • matched pair → educational card, locked 10s while the clock is PAUSED
  *     by the parent (reading the payload is free time).
  *   • meme trap    → locked a full 6s "stun" while the clock KEEPS RUNNING —
  *     that wasted time is the whole punishment.
  * The board is frozen underneath; the CTA counts the lock down and only then
  * becomes pressable (the backdrop never dismisses while locked).
  */
-const LOCK_SECONDS = { pair: 15, meme: 6 } as const;
+const LOCK_SECONDS = { pair: 10, meme: 6 } as const;
 
 export function RevealModal({ reveal, onClose }: { reveal: Reveal; onClose: () => void }) {
   const isPair = reveal.type === 'pair';
