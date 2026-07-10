@@ -3,7 +3,9 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { useAuthStore, selectIsAdmin, selectIsAuthenticated } from '@/stores/authStore';
+import { AppError } from '@/lib/errors';
 import * as authService from '../services/auth.service';
+import { signInAction } from '../actions/sign-in.action';
 import type { LoginInput, SignupInput } from '../schemas/auth.schema';
 
 /**
@@ -25,15 +27,23 @@ export function useAuth() {
 
 export function useSignIn(redirectTo: string = '/map') {
   const setUser = useAuthStore((s) => s.setUser);
-  const router = useRouter();
   const qc = useQueryClient();
 
   return useMutation({
-    mutationFn: (input: LoginInput) => authService.signIn(input),
+    mutationFn: async (input: LoginInput) => {
+      // Sign-in runs server-side so the username→email lookup never reaches the
+      // browser (see signInAction). The auth cookies are set by the action.
+      const res = await signInAction(input);
+      if (!res.ok) throw new AppError('UNAUTHENTICATED', res.message);
+      return res.user;
+    },
     onSuccess: (user) => {
       setUser(user);
       qc.invalidateQueries();
-      router.push(redirectTo);
+      // Full navigation (not router.push) so the shared browser Supabase client
+      // re-initialises from the freshly-set auth cookies — otherwise its
+      // in-memory session stays anonymous and RLS-guarded reads on /map fail.
+      window.location.assign(redirectTo);
     },
   });
 }

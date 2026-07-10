@@ -3,59 +3,18 @@ import { getAuthUser } from '@/services/profile.service';
 import { AppError } from '@/lib/errors';
 import { createLogger } from '@/lib/logger';
 import type { AuthUser } from '@/types/auth.types';
-import type { LoginInput, SignupInput } from '../schemas/auth.schema';
+import type { SignupInput } from '../schemas/auth.schema';
 
 const log = createLogger('feature:auth');
 
 /**
- * Auth feature service — orchestrates Supabase Auth + profile hydration and
- * announces auth lifecycle on the app event bus. UI components call these and
- * never touch Supabase directly.
+ * Auth feature service — orchestrates Supabase Auth + profile hydration. UI
+ * components call these and never touch Supabase directly.
+ *
+ * NOTE: sign-in lives in a server action (actions/sign-in.action.ts), not here,
+ * so username→email resolution stays server-side and never leaks emails to the
+ * browser. This module keeps the operations that are safe on the client.
  */
-
-/**
- * Resolve the login identifier to an email. If it already looks like an email we
- * use it directly; otherwise we treat it as a username and ask the DB function
- * for the matching email (Supabase Auth can't authenticate by username).
- */
-async function resolveEmail(
-  supabase: ReturnType<typeof createClient>,
-  identifier: string,
-): Promise<string | null> {
-  if (identifier.includes('@')) return identifier;
-  const { data, error } = await supabase.rpc('get_email_for_username', {
-    p_username: identifier,
-  });
-  if (error) log.warn('username resolution failed', { message: error.message });
-  return data ?? null;
-}
-
-export async function signIn(input: LoginInput): Promise<AuthUser> {
-  const supabase = createClient();
-
-  const email = await resolveEmail(supabase, input.identifier.trim());
-  // Same generic error whether the username is unknown or the password is wrong
-  // — never reveal which usernames/emails exist.
-  if (!email) throw new AppError('UNAUTHENTICATED', 'Sai tài khoản hoặc mật khẩu.');
-
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email,
-    password: input.password,
-  });
-
-  if (error || !data.user) {
-    log.warn('sign-in failed', { message: error?.message });
-    throw new AppError('UNAUTHENTICATED', 'Sai tài khoản hoặc mật khẩu.');
-  }
-
-  const user = await getAuthUser(supabase, {
-    id: data.user.id,
-    email: data.user.email ?? null,
-  });
-  if (!user) throw new AppError('NOT_FOUND', 'Profile not found for this account.');
-
-  return user;
-}
 
 export async function signUp(input: SignupInput): Promise<void> {
   const supabase = createClient();

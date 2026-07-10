@@ -9,8 +9,9 @@ import { Button } from '@/components/ui/Button';
 import { isAppError } from '@/lib/errors';
 
 /**
- * Sign-in form. The single identifier field accepts an email OR a username; the
- * auth service resolves a username to its email before calling Supabase.
+ * Sign-in form. The single identifier field accepts an email OR a username; a
+ * server action resolves a username to its email (server-side, never exposing
+ * emails) before calling Supabase.
  */
 export function LoginForm({
   justRegistered = false,

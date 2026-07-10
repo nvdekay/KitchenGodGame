@@ -8,8 +8,8 @@ import { z } from 'zod';
 
 /**
  * Login accepts EITHER an email OR a username in a single `identifier` field.
- * The service resolves a username to its email before calling Supabase Auth
- * (which only authenticates by email). See auth.service.signIn.
+ * The server action resolves a username to its email before calling Supabase
+ * Auth (which only authenticates by email). See actions/sign-in.action.
  */
 export const loginSchema = z.object({
   identifier: z.string().min(1, 'Nhập email hoặc username.'),
