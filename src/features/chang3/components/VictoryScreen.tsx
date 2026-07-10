@@ -3,16 +3,10 @@
 import { useEffect } from 'react';
 import { motion } from 'motion/react';
 import { fireConfetti } from '@/lib/confetti';
-import { Parchment } from '@/components/ui/game';
+import { Parchment, SaveStatusLine, type SaveState } from '@/components/ui/game';
 import { FINALE, KEYWORD_WORDS, VICTORY } from '../data';
 
-export type SaveState = 'saving' | 'saved' | 'failed';
-
-const SAVE_TEXT: Record<SaveState, string> = {
-  saving: 'Đang lưu tiến độ…',
-  saved: '✓ Đã lưu, bạn đã hoàn thành CẢ BA CHẶNG! Thời gian của bạn đã vào bảng xếp hạng.',
-  failed: '⚠ Chưa lưu được tiến độ lên máy chủ.',
-};
+export type { SaveState };
 
 /**
  * The stage-3 victory: sustained confetti, the guessed keyword, the glowing
@@ -23,10 +17,12 @@ const SAVE_TEXT: Record<SaveState, string> = {
 export function VictoryScreen({
   elapsed,
   saveState,
+  onRetry,
   onFinish,
 }: {
   elapsed: number;
   saveState: SaveState;
+  onRetry: () => void;
   onFinish: () => void;
 }) {
   const mm = String(Math.floor(elapsed / 60)).padStart(2, '0');
@@ -114,7 +110,11 @@ export function VictoryScreen({
           <p className="mt-3 text-sm font-bold text-sky-800">
             🏁 Tổng thời gian chơi cả hành trình: {mm}:{ss}
           </p>
-          <p className="mt-1 text-xs text-neutral-500">{SAVE_TEXT[saveState]}</p>
+          <SaveStatusLine
+            saveState={saveState}
+            savedMessage="✓ Đã lưu, bạn đã hoàn thành CẢ BA CHẶNG! Thời gian của bạn đã vào bảng xếp hạng."
+            onRetry={onRetry}
+          />
 
           <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
             {/* KẾT THÚC — closes the game, opens the grand finale */}

@@ -88,6 +88,8 @@ export function Chang3Game({
 
   const saveState: SaveState =
     submit.isPending || submit.isIdle ? 'saving' : submit.data === true ? 'saved' : 'failed';
+  // Re-send the same run if the save failed (play time is frozen on victory).
+  const handleRetrySave = () => submit.mutate(stageSecondsRef.current);
 
   return (
     <main className="relative h-[100dvh] w-screen overflow-hidden bg-[#4aa8ff]">
@@ -183,6 +185,7 @@ export function Chang3Game({
             <VictoryScreen
               elapsed={elapsed}
               saveState={saveState}
+              onRetry={handleRetrySave}
               onFinish={() => setPhase('finale')}
             />
           </motion.div>

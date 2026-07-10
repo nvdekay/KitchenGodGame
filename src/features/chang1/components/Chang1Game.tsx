@@ -107,13 +107,22 @@ export function Chang1Game({
   const handleModalClose = () => {
     if (feedback?.kind === 'correct') {
       if (isLast) setPhase('victory');
-      else setRound((r) => ({ qIndex: r.qIndex + 1, order: orderForQuestion(r.qIndex + 1), wrong: [] }));
+      else
+        setRound((r) => ({
+          qIndex: r.qIndex + 1,
+          order: orderForQuestion(r.qIndex + 1),
+          wrong: [],
+        }));
     }
     setFeedback(null);
   };
 
   const saveState: SaveState =
     submit.isPending || submit.isIdle ? 'saving' : submit.data === true ? 'saved' : 'failed';
+  // Re-send the same run if the save failed — the play time is frozen once the
+  // clock stops on victory, so the refs still hold the exact payload.
+  const handleRetrySave = () =>
+    submit.mutate({ picks: picksRef.current, playSeconds: stageSecondsRef.current });
 
   return (
     <main className="relative h-[100dvh] w-screen overflow-hidden bg-[#4aa8ff]">
@@ -200,7 +209,7 @@ export function Chang1Game({
             animate={{ opacity: 1 }}
             transition={{ duration: 0.4 }}
           >
-            <VictoryScreen elapsed={elapsed} saveState={saveState} />
+            <VictoryScreen elapsed={elapsed} saveState={saveState} onRetry={handleRetrySave} />
           </motion.div>
         )}
       </AnimatePresence>

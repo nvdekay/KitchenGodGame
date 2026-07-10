@@ -1,8 +1,20 @@
 'use client';
 
 import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion, type HTMLMotionProps } from 'motion/react';
+import { fireConfetti } from '@/lib/confetti';
 import { cn } from '@/utils/cn';
+
+/** Server-save status shared by every stage victory screen. */
+export type SaveState = 'saving' | 'saved' | 'failed';
+
+/** One place for the save-status line; only the "saved" sentence differs per stage. */
+export function saveStatusText(state: SaveState, savedMessage: string): string {
+  if (state === 'saving') return 'Đang lưu tiến độ…';
+  if (state === 'saved') return savedMessage;
+  return '⚠ Chưa lưu được tiến độ lên máy chủ.';
+}
 
 /**
  * Shared surfaces for the per-stage games (chặng 1, 2, …): the cream parchment
@@ -291,5 +303,173 @@ export function LockedModal({
         {children}
       </motion.div>
     </motion.div>
+  );
+}
+
+/**
+ * Save-status line for the victory screens: the status text, plus a "Thử lưu
+ * lại" retry when the save failed — so a transient network error doesn't force
+ * the player to replay the whole stage (completion is server-authoritative).
+ */
+export function SaveStatusLine({
+  saveState,
+  savedMessage,
+  onRetry,
+}: {
+  saveState: SaveState;
+  savedMessage: string;
+  onRetry: () => void;
+}) {
+  return (
+    <div className="mt-1 flex flex-col items-center gap-1.5">
+      <p
+        className={cn(
+          'text-xs',
+          saveState === 'failed' ? 'font-semibold text-red-600' : 'text-neutral-500',
+        )}
+      >
+        {saveStatusText(saveState, savedMessage)}
+      </p>
+      {saveState === 'failed' && (
+        <button
+          type="button"
+          onClick={onRetry}
+          className="rounded-full border border-amber-300 bg-amber-50 px-3 py-1 text-xs font-bold text-amber-800 shadow-sm outline-none transition hover:bg-amber-100 focus-visible:ring-2 focus-visible:ring-amber-300"
+        >
+          🔁 Thử lưu lại
+        </button>
+      )}
+    </div>
+  );
+}
+
+/**
+ * Shared victory reveal for the mid-journey stages (chặng 1 & 2): confetti, the
+ * glowing Táo, the unlocked identity, the period intro, a run-stats line, the
+ * save status (with retry), and the "Về bản đồ" button. Chặng 3's finale screen
+ * is bespoke (keyword stamp + KẾT THÚC) and stays separate.
+ */
+export function StageVictory({
+  period,
+  heading,
+  taoImg,
+  taoName,
+  taoAlt,
+  unlockLabel,
+  intro,
+  timeSeconds,
+  statsSuffix,
+  saveState,
+  savedMessage,
+  onRetry,
+}: {
+  period: string;
+  heading: string;
+  taoImg: string;
+  taoName: string;
+  taoAlt: string;
+  unlockLabel: string;
+  intro: string;
+  timeSeconds: number;
+  /** Appended after the time, e.g. " · 🔄 12 lượt lật". */
+  statsSuffix?: string;
+  saveState: SaveState;
+  savedMessage: string;
+  onRetry: () => void;
+}) {
+  const router = useRouter();
+  const [leaving, setLeaving] = useState(false);
+  const mm = String(Math.floor(timeSeconds / 60)).padStart(2, '0');
+  const ss = String(timeSeconds % 60).padStart(2, '0');
+
+  useEffect(() => {
+    void fireConfetti(true);
+  }, []);
+
+  return (
+    <div className="relative z-10 flex min-h-full items-center justify-center px-4 py-6">
+      <div className="w-full max-w-lg">
+        <Parchment className="px-6 py-7 text-center sm:px-10">
+          <motion.p
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-[11px] font-black tracking-[0.28em] text-amber-600"
+          >
+            🎉 {period}
+          </motion.p>
+          <motion.h1
+            initial={{ opacity: 0, scale: 0.7 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.1, type: 'spring', stiffness: 220, damping: 16 }}
+            className="text-[clamp(24px,3.6vw,40px)] font-black text-green-700"
+          >
+            {heading}
+          </motion.h1>
+
+          {/* Glowing Táo reveal */}
+          <div className="relative mx-auto mt-3 h-[clamp(140px,22vh,220px)] w-[clamp(140px,22vh,220px)]">
+            <motion.div
+              aria-hidden
+              className="absolute inset-[-18%] rounded-full bg-[radial-gradient(circle,rgba(255,214,90,0.85),rgba(255,214,90,0)_70%)]"
+              animate={{ scale: [1, 1.12, 1], opacity: [0.75, 1, 0.75] }}
+              transition={{ duration: 2.6, repeat: Infinity, ease: 'easeInOut' }}
+            />
+            <motion.img
+              src={taoImg}
+              alt={taoAlt}
+              draggable={false}
+              initial={{ scale: 0, rotate: -12 }}
+              animate={{ scale: 1, rotate: 0 }}
+              transition={{ delay: 0.35, type: 'spring', stiffness: 200, damping: 14 }}
+              className="relative h-full w-full object-contain drop-shadow-[0_14px_20px_rgba(120,60,0,0.35)]"
+            />
+          </div>
+
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.7 }}
+            className="mt-1 text-xs font-bold uppercase tracking-widest text-amber-700"
+          >
+            {unlockLabel}
+          </motion.p>
+          <motion.h2
+            initial={{ scale: 0.4, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: 0.85, type: 'spring', stiffness: 240, damping: 15 }}
+            className="bg-gradient-to-b from-amber-400 to-amber-600 bg-clip-text text-[clamp(28px,4.5vw,44px)] font-black text-transparent"
+          >
+            {taoName}
+          </motion.h2>
+
+          <motion.p
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1.1 }}
+            className="mt-3 rounded-2xl bg-amber-100/70 px-4 py-3 text-left text-sm leading-relaxed text-amber-950 sm:text-[15px]"
+          >
+            {intro}
+          </motion.p>
+
+          <p className="mt-3 text-sm font-bold text-sky-800">
+            ⏱ Tổng thời gian chơi: {mm}:{ss}
+            {statsSuffix}
+          </p>
+          <SaveStatusLine saveState={saveState} savedMessage={savedMessage} onRetry={onRetry} />
+
+          <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
+            <GoldButton
+              loading={leaving}
+              onClick={() => {
+                setLeaving(true);
+                router.push('/map');
+              }}
+            >
+              Về bản đồ 🗺️
+            </GoldButton>
+          </div>
+        </Parchment>
+      </div>
+    </div>
   );
 }
