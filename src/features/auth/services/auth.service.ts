@@ -62,7 +62,7 @@ export async function signUp(input: SignupInput): Promise<void> {
   // The DB trigger (see migration 0001) creates the profile + default 'player'
   // role from this metadata, so signup stays a single round-trip. If the email
   // OR username is taken, the insert/trigger fails and Supabase returns an error.
-  const { error } = await supabase.auth.signUp({
+  const { data, error } = await supabase.auth.signUp({
     email: input.email,
     password: input.password,
     options: { data: { username: input.username } },
@@ -71,6 +71,11 @@ export async function signUp(input: SignupInput): Promise<void> {
     log.warn('sign-up failed', { message: error.message });
     throw new AppError('CONFLICT', 'Email hoặc username đã được sử dụng.');
   }
+  // Supabase auto-confirm signs the new account in immediately, but the product
+  // flow is "register → log in yourself" (the /login?registered=1 banner).
+  // Drop the session so the user isn't left half-signed-in on an auth route —
+  // middleware would otherwise bounce a reload of /login over to /map.
+  if (data.session) await supabase.auth.signOut();
 }
 
 export async function signOut(): Promise<void> {
