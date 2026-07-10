@@ -47,18 +47,27 @@ export async function updateSession(request: NextRequest) {
     pathname.startsWith('/admin') ||
     pathname.startsWith('/account');
 
+  // Carry the auth cookies that getUser() may have rotated onto the redirect,
+  // otherwise a refresh at a redirect boundary drops the new tokens and can
+  // spuriously sign the user out or loop. (Supabase SSR gotcha.)
+  const redirectWithCookies = (url: URL) => {
+    const redirect = NextResponse.redirect(url);
+    response.cookies.getAll().forEach((cookie) => redirect.cookies.set(cookie));
+    return redirect;
+  };
+
   if (!user && isProtected) {
     const url = request.nextUrl.clone();
     url.pathname = '/login';
     url.searchParams.set('redirectTo', pathname);
-    return NextResponse.redirect(url);
+    return redirectWithCookies(url);
   }
 
   if (user && isAuthRoute) {
     const url = request.nextUrl.clone();
     url.pathname = '/map';
     url.search = '';
-    return NextResponse.redirect(url);
+    return redirectWithCookies(url);
   }
 
   // NOTE: role-based gating (admin) is enforced in the /admin layout + RLS, not

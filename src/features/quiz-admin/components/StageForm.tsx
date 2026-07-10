@@ -22,6 +22,11 @@ export function StageForm({
   const [title, setTitle] = useState(initial?.title ?? '');
   const [description, setDescription] = useState(initial?.description ?? '');
 
+  // An empty number input parses to NaN; guard so a NaN/0/negative ord can't be
+  // submitted (it would fail opaquely at the DB).
+  const ordValid = Number.isInteger(ord) && ord >= 1;
+  const canSubmit = title.trim() !== '' && ordValid;
+
   return (
     <div className="space-y-2 rounded border bg-neutral-50 p-3">
       <div className="flex gap-2">
@@ -48,7 +53,7 @@ export function StageForm({
       <div className="flex gap-2">
         <Button
           onClick={() => onSubmit({ ord, title: title.trim(), description: description.trim() || null })}
-          disabled={pending || !title.trim()}
+          disabled={pending || !canSubmit}
         >
           {pending ? 'Đang lưu…' : 'Lưu'}
         </Button>

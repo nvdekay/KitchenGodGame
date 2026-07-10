@@ -19,8 +19,10 @@ import { VictoryScreen, type SaveState } from './VictoryScreen';
 
 export type Chang1Phase = 'intro' | 'playing' | 'victory';
 
-/** Display order of the six answer cards for one question. */
+/** Shuffled display order of a question's answer cards (derived from its own
+ *  option count, so a question with a different number of options still works). */
 const shuffledIndices = (n: number) => shuffle(Array.from({ length: n }, (_, i) => i));
+const orderForQuestion = (index: number) => shuffledIndices(QUESTIONS[index]?.options.length ?? 0);
 
 /**
  * Chặng 1 — "Hồ sơ thất lạc". Orchestrates the three phases:
@@ -48,7 +50,7 @@ export function Chang1Game({
   const [phase, setPhase] = useState<Chang1Phase>(initialPhase);
   const [round, setRound] = useState(() => ({
     qIndex: 0,
-    order: shuffledIndices(6),
+    order: orderForQuestion(0),
     wrong: [] as number[],
   }));
   const [feedback, setFeedback] = useState<Feedback | null>(null);
@@ -105,7 +107,7 @@ export function Chang1Game({
   const handleModalClose = () => {
     if (feedback?.kind === 'correct') {
       if (isLast) setPhase('victory');
-      else setRound((r) => ({ qIndex: r.qIndex + 1, order: shuffledIndices(6), wrong: [] }));
+      else setRound((r) => ({ qIndex: r.qIndex + 1, order: orderForQuestion(r.qIndex + 1), wrong: [] }));
     }
     setFeedback(null);
   };

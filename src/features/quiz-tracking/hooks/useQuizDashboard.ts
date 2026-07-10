@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { createClient } from '@/lib/supabase/client';
 import { useRealtimeChannel } from '@/hooks/useRealtimeChannel';
@@ -9,13 +9,16 @@ import { getQuizDashboard } from '../services/quiz-tracking.service';
 const KEY = ['quiz-dashboard'] as const;
 
 /**
- * Live admin dashboard data. React Query owns the fetch; a Realtime subscription
- * on stage_completions triggers a refresh whenever any player clears a stage.
+ * Live admin dashboard data. React Query owns the fetch; Realtime subscriptions
+ * on BOTH stage_completions (a player cleared a stage) and quiz_runs (a player
+ * started or finished the whole run) trigger a refresh — the ranking's start/
+ * finish times come from quiz_runs, so watching only completions would miss a
+ * run that starts/finishes without a coincident completion until the poll.
  *
- * For 50 concurrent players a burst of completions would otherwise fire dozens of
- * refetches per second, so invalidation is DEBOUNCED — a flurry of changes
- * coalesces into a single refetch. A slow `refetchInterval` is a self-healing
- * fallback in case a Realtime message is ever dropped.
+ * For 50 concurrent players a burst would otherwise fire dozens of refetches per
+ * second, so invalidation is DEBOUNCED — a flurry coalesces into a single
+ * refetch. A slow `refetchInterval` is a self-healing fallback if a Realtime
+ * message is ever dropped.
  */
 export function useQuizDashboard() {
   const qc = useQueryClient();
@@ -28,23 +31,34 @@ export function useQuizDashboard() {
     refetchOnWindowFocus: true,
   });
 
-  const config = useMemo(
+  const scheduleRefetch = useCallback(() => {
+    if (timer.current) clearTimeout(timer.current);
+    timer.current = setTimeout(() => qc.invalidateQueries({ queryKey: KEY }), 500);
+  }, [qc]);
+
+  const completionsConfig = useMemo(
     () => ({ event: '*', schema: 'public', table: 'stage_completions' }),
     [],
   );
+  const runsConfig = useMemo(() => ({ event: '*', schema: 'public', table: 'quiz_runs' }), []);
 
   useRealtimeChannel('admin:stage_completions', {
     event: 'postgres_changes',
-    config,
-    onMessage: () => {
-      if (timer.current) clearTimeout(timer.current);
-      timer.current = setTimeout(() => qc.invalidateQueries({ queryKey: KEY }), 500);
-    },
+    config: completionsConfig,
+    onMessage: scheduleRefetch,
+  });
+  useRealtimeChannel('admin:quiz_runs', {
+    event: 'postgres_changes',
+    config: runsConfig,
+    onMessage: scheduleRefetch,
   });
 
-  useEffect(() => () => {
-    if (timer.current) clearTimeout(timer.current);
-  }, []);
+  useEffect(
+    () => () => {
+      if (timer.current) clearTimeout(timer.current);
+    },
+    [],
+  );
 
   return query;
 }

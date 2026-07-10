@@ -114,10 +114,11 @@ function StageCard({
               Sửa
             </button>
             <button
+              disabled={admin.deleteStage.isPending}
               onClick={() => {
                 if (confirm(`Xoá ${stage.title} và toàn bộ câu hỏi?`)) admin.deleteStage.mutate(stage.id);
               }}
-              className="text-red-600"
+              className="text-red-600 disabled:cursor-not-allowed disabled:opacity-50"
             >
               Xoá
             </button>
@@ -160,10 +161,11 @@ function StageCard({
                   Sửa
                 </button>
                 <button
+                  disabled={admin.deleteQuestion.isPending}
                   onClick={() => {
                     if (confirm('Xoá câu hỏi này?')) admin.deleteQuestion.mutate(q.id);
                   }}
-                  className="text-red-600"
+                  className="text-red-600 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   Xoá
                 </button>

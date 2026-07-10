@@ -57,6 +57,7 @@ export function GoldButton({
       whileHover={loading ? undefined : { scale: 1.05 }}
       whileTap={loading ? undefined : { scale: 0.93 }}
       disabled={disabled || loading}
+      aria-busy={loading}
       className={cn(
         'rounded-full border-2 border-amber-200/80 bg-gradient-to-b from-amber-300 via-amber-400 to-amber-500',
         'px-8 py-3 text-base font-extrabold text-amber-950 shadow-[0_8px_20px_rgba(180,120,0,0.4)]',
