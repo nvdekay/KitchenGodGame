@@ -1,7 +1,13 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { AnimatePresence, motion, useAnimationFrame, useMotionValue } from 'motion/react';
+import {
+  AnimatePresence,
+  motion,
+  useAnimationFrame,
+  useMotionValue,
+  useReducedMotion,
+} from 'motion/react';
 import { AnswerCard } from './AnswerCard';
 import type { Chang1Question } from '../data';
 
@@ -38,6 +44,9 @@ export function CardMarquee({
   const x = useMotionValue(0);
   const minXRef = useRef(0);
   const dirRef = useRef(-1);
+  // MotionConfig can't reach this rAF loop (it's not an `animate` prop), so honour
+  // reduced-motion here: the cards sit still and stay tappable instead of drifting.
+  const reduceMotion = useReducedMotion();
 
   useEffect(() => {
     const measure = () => {
@@ -55,7 +64,7 @@ export function CardMarquee({
   }, [x]);
 
   useAnimationFrame((_, delta) => {
-    if (paused || minXRef.current === 0) return;
+    if (paused || reduceMotion || minXRef.current === 0) return;
     let nx = x.get() + dirRef.current * SPEED * (delta / 1000);
     if (nx <= minXRef.current) {
       nx = minXRef.current;

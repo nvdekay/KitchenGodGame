@@ -1,4 +1,5 @@
 import type { TypedSupabaseClient } from '@/lib/supabase/types';
+import { AppError } from '@/lib/errors';
 
 /**
  * Admin tracking data. Read with the admin's own (cookie-bound) client — RLS lets
@@ -26,17 +27,27 @@ export interface DashboardData {
 }
 
 export async function getQuizDashboard(db: TypedSupabaseClient): Promise<DashboardData> {
-  // Run the four reads concurrently (each wrapped so Promise.all sees a clean
-  // array): one round-trip of latency instead of four.
-  const [stages, profiles, runs, comps] = await Promise.all([
-    (async () => (await db.from('stages').select('ord').order('ord')).data ?? [])(),
-    (async () => (await db.from('profiles').select('id,username')).data ?? [])(),
-    (async () =>
-      (await db.from('quiz_runs').select('user_id,started_at,finished_at')).data ?? [])(),
-    (async () =>
-      (await db.from('stage_completions').select('user_id,stage_ord,completed_at,play_seconds'))
-        .data ?? [])(),
+  // Run the four reads concurrently: one round-trip of latency instead of four.
+  const [stagesRes, profilesRes, runsRes, compsRes] = await Promise.all([
+    db.from('stages').select('ord').order('ord'),
+    db.from('profiles').select('id,username'),
+    db.from('quiz_runs').select('user_id,started_at,finished_at'),
+    db.from('stage_completions').select('user_id,stage_ord,completed_at,play_seconds'),
   ]);
+
+  // Surface read failures (RLS denial, network) instead of coalescing to [] —
+  // otherwise React Query never sees an error and the dashboard silently renders
+  // "no players" while its retry UI stays dead code.
+  for (const res of [stagesRes, profilesRes, runsRes, compsRes]) {
+    if (res.error) {
+      throw new AppError('UNKNOWN', `Không tải được dữ liệu theo dõi: ${res.error.message}`);
+    }
+  }
+
+  const stages = stagesRes.data ?? [];
+  const profiles = profilesRes.data ?? [];
+  const runs = runsRes.data ?? [];
+  const comps = compsRes.data ?? [];
 
   const stageOrds = stages.map((s) => s.ord);
   const nameOf = new Map(profiles.map((p) => [p.id, p.username]));
@@ -51,18 +62,14 @@ export async function getQuizDashboard(db: TypedSupabaseClient): Promise<Dashboa
     playSecondsOf.set(c.user_id, (playSecondsOf.get(c.user_id) ?? 0) + (c.play_seconds ?? 0));
   }
 
-  const userIds = new Set<string>([
-    ...runs.map((r) => r.user_id),
-    ...comps.map((c) => c.user_id),
-  ]);
+  const userIds = new Set<string>([...runs.map((r) => r.user_id), ...comps.map((c) => c.user_id)]);
 
   const players: PlayerRow[] = [...userIds].map((uid) => {
     const run = runOf.get(uid);
     const startedAt = run?.started_at ?? null;
     const finishedAt = run?.finished_at ?? null;
     const playMs = (playSecondsOf.get(uid) ?? 0) * 1000;
-    const wallMs =
-      startedAt && finishedAt ? Date.parse(finishedAt) - Date.parse(startedAt) : null;
+    const wallMs = startedAt && finishedAt ? Date.parse(finishedAt) - Date.parse(startedAt) : null;
     return {
       userId: uid,
       username: nameOf.get(uid) ?? uid.slice(0, 8),

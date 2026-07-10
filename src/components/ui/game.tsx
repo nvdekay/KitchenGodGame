@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { motion, type HTMLMotionProps } from 'motion/react';
 import { cn } from '@/utils/cn';
 
@@ -182,6 +183,112 @@ export function FishTimer({ seconds }: { seconds: number }) {
       >
         {time}
       </span>
+    </motion.div>
+  );
+}
+
+/**
+ * Read-lock countdown shared by the feedback/reveal modals: ticks `seconds`→0
+ * once per second. `locked` is true until it reaches 0. Mounts fresh per modal.
+ */
+export function useReadLock(seconds: number) {
+  const [lockLeft, setLockLeft] = useState(seconds);
+  useEffect(() => {
+    const t = setInterval(() => setLockLeft((s) => (s > 0 ? s - 1 : 0)), 1000);
+    return () => clearInterval(t);
+  }, []);
+  return { lockLeft, locked: lockLeft > 0 };
+}
+
+/**
+ * Accessible modal shell for the game's locked pop-ups (feedback, reveal). A
+ * real dialog: `role="dialog"` + `aria-modal`, moves focus in on open and
+ * restores it on close, traps Tab within, and closes on Escape / backdrop click
+ * ONLY when `dismissible` (i.e. the read-lock has elapsed and dismissal is
+ * allowed for this variant). Keeps the same backdrop + spring pop so
+ * AnimatePresence exit still plays. `announce` is spoken via an aria-live region
+ * so screen-reader users hear the lock start and release without per-second spam.
+ */
+export function LockedModal({
+  dismissible,
+  onDismiss,
+  labelledById,
+  announce,
+  children,
+}: {
+  dismissible: boolean;
+  onDismiss: () => void;
+  labelledById?: string;
+  announce?: string;
+  children: ReactNode;
+}) {
+  const dialogRef = useRef<HTMLDivElement>(null);
+
+  // Focus the dialog on open; restore focus to the trigger on close.
+  useEffect(() => {
+    const prev = document.activeElement as HTMLElement | null;
+    dialogRef.current?.focus();
+    return () => prev?.focus?.();
+  }, []);
+
+  // Escape closes (when allowed); Tab is trapped within the dialog.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (dismissible) onDismiss();
+        return;
+      }
+      if (e.key !== 'Tab') return;
+      const focusables = dialogRef.current?.querySelectorAll<HTMLElement>(
+        'button:not([disabled]), [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+      );
+      if (!focusables || focusables.length === 0) {
+        e.preventDefault();
+        dialogRef.current?.focus();
+        return;
+      }
+      const first = focusables[0]!;
+      const last = focusables[focusables.length - 1]!;
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [dismissible, onDismiss]);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      onClick={dismissible ? onDismiss : undefined}
+      className="fixed inset-0 z-50 grid place-items-center bg-sky-950/40 p-4 backdrop-blur-[3px]"
+    >
+      <motion.div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={labelledById}
+        tabIndex={-1}
+        initial={{ scale: 0.7, y: 30, opacity: 0 }}
+        animate={{ scale: 1, y: 0, opacity: 1 }}
+        exit={{ scale: 0.8, opacity: 0 }}
+        transition={{ type: 'spring', stiffness: 320, damping: 24 }}
+        onClick={(e) => e.stopPropagation()}
+        className="w-full max-w-md outline-none"
+      >
+        {announce !== undefined && (
+          <span className="sr-only" role="status" aria-live="polite">
+            {announce}
+          </span>
+        )}
+        {children}
+      </motion.div>
     </motion.div>
   );
 }

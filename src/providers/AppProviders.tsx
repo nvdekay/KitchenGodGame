@@ -11,14 +11,16 @@ import { AuthProvider } from './AuthProvider';
  * feature flags) is a one-line change here — order matters: outer providers are
  * available to inner ones.
  *
- * MotionConfig `reducedMotion="never"` keeps Framer Motion animations playing
- * app-wide regardless of the OS "reduce motion" setting — the ambient game
- * motion (bouncing Táo, swaying scroll, map arrows) is core to the experience.
- * Switch back to "user" if strict accessibility respect is preferred.
+ * MotionConfig `reducedMotion="user"` respects the OS "reduce motion" setting:
+ * for those users Framer disables transform/layout animations (the bouncing
+ * Táo, swaying scroll, spring pop-ins, sliding entrances) while still animating
+ * opacity/colour, so essential fades and loading feedback keep working. The
+ * one motion not covered by this — the rAF-driven answer-card drift in chặng 1
+ * — is gated separately with `useReducedMotion()` inside CardMarquee.
  */
 export function AppProviders({ children }: { children: ReactNode }) {
   return (
-    <MotionConfig reducedMotion="never">
+    <MotionConfig reducedMotion="user">
       <QueryProvider>
         <AuthProvider>{children}</AuthProvider>
       </QueryProvider>

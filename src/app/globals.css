@@ -32,13 +32,12 @@ body {
   }
 }
 
-/* Respect users who prefer less motion (belt-and-suspenders with MotionConfig). */
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.001ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.001ms !important;
-  }
-}
+/*
+ * Reduced-motion is handled by MotionConfig `reducedMotion="user"` (see
+ * AppProviders): it disables Framer's transform/layout animations for users who
+ * ask for less motion. We intentionally do NOT blanket-kill CSS animation here —
+ * a previous `animation-duration: 0.001ms !important` rule also froze essential
+ * feedback like the loading spinners (`animate-spin`). The remaining CSS loops
+ * (spin, ping, pulse) are small, essential/decorative feedback and are left to
+ * run. Add a targeted rule here only if a specific CSS animation proves harmful.
+ */

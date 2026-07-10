@@ -38,8 +38,16 @@ export function QuestionForm({
 
   const changeType = (t: QuestionType) => {
     setType(t);
-    if (t === 'boolean') setCorrect((c) => c.slice(0, 1));
-    else if (t === 'single') setCorrect((c) => c.slice(0, 1));
+    // Drop any selected index that no longer maps to an option after the switch
+    // (e.g. boolean has only 2 options, so a previously-correct index ≥2 must go),
+    // then keep at most one for the single-answer types. Otherwise an
+    // out-of-range correct_indices reaches the DB and the question has no
+    // resolvable correct answer.
+    const optCount = t === 'boolean' ? BOOL_OPTIONS.length : options.length;
+    setCorrect((c) => {
+      const inRange = c.filter((i) => i < optCount);
+      return t === 'multiple' ? inRange : inRange.slice(0, 1);
+    });
   };
 
   const toggleCorrect = (idx: number) => {
@@ -62,7 +70,8 @@ export function QuestionForm({
     prompt.trim() !== '' &&
     effectiveOptions.length >= 2 &&
     effectiveOptions.every((o) => o.trim() !== '') &&
-    correct.length >= 1;
+    correct.length >= 1 &&
+    correct.every((i) => i >= 0 && i < effectiveOptions.length);
 
   const submit = () =>
     onSubmit({
@@ -117,7 +126,11 @@ export function QuestionForm({
               />
             )}
             {!isBool && options.length > 2 && (
-              <button onClick={() => removeOption(idx)} className="text-xs text-red-500" aria-label="Xoá đáp án">
+              <button
+                onClick={() => removeOption(idx)}
+                className="text-xs text-red-500"
+                aria-label="Xoá đáp án"
+              >
                 ✕
               </button>
             )}

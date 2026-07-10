@@ -31,8 +31,27 @@ export function KeywordPanel({ onSolved }: { onSolved: () => void }) {
     inputRef.current?.focus();
   }, []);
 
+  // Keep input from overflowing the visible boxes: allow spaces/punctuation but
+  // stop accepting characters once `totalLetters` actual letters are in. Without
+  // this, a stray extra keystroke fills no visible box yet fails the compare —
+  // the grid looks complete and correct but the guess is rejected with no clue.
+  const handleChange = (value: string) => {
+    let count = 0;
+    let capped = '';
+    for (const ch of value) {
+      if (/\p{L}/u.test(ch)) {
+        if (count >= totalLetters) break;
+        count++;
+      }
+      capped += ch;
+    }
+    setRaw(capped);
+  };
+
   const handleGuess = () => {
-    if (normalizeAnswer(raw) === KEYWORD_NORMALIZED) {
+    // Compare exactly what the boxes show (capped, letters-only) — never the raw
+    // string, so trailing/overflow characters can't cause a false "wrong".
+    if (normalizeAnswer(letters.join('')) === KEYWORD_NORMALIZED) {
       onSolved();
     } else {
       setWrong(true);
@@ -108,7 +127,7 @@ export function KeywordPanel({ onSolved }: { onSolved: () => void }) {
           <input
             ref={inputRef}
             value={raw}
-            onChange={(e) => setRaw(e.target.value)}
+            onChange={(e) => handleChange(e.target.value)}
             autoCapitalize="characters"
             autoComplete="off"
             autoCorrect="off"
@@ -116,7 +135,12 @@ export function KeywordPanel({ onSolved }: { onSolved: () => void }) {
             aria-label="Nhập cụm từ khóa"
             className="absolute h-0 w-0 opacity-0"
           />
-          <p className={cn('mt-2 h-5 text-sm font-bold', wrong ? 'text-red-600' : 'text-transparent')}>
+          <p
+            className={cn(
+              'mt-2 h-5 text-sm font-bold',
+              wrong ? 'text-red-600' : 'text-transparent',
+            )}
+          >
             Chưa đúng rồi — nhìn kỹ bức tranh và thử lại!
           </p>
           <GoldButton className="mt-1" onClick={handleGuess}>

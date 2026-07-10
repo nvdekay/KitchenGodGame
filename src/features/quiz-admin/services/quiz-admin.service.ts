@@ -43,11 +43,21 @@ export interface QuestionInput {
 }
 
 export async function listStagesWithQuestions(db: TypedSupabaseClient): Promise<AdminStage[]> {
-  const { data: stages } = await db.from('stages').select('id,ord,title,description').order('ord');
-  const { data: questions } = await db
+  const { data: stages, error: stagesError } = await db
+    .from('stages')
+    .select('id,ord,title,description')
+    .order('ord');
+  const { data: questions, error: questionsError } = await db
     .from('questions')
     .select('id,stage_id,ord,type,prompt,options,correct_indices')
     .order('ord');
+
+  // Don't coalesce a failed read to [] — that would render "no stages" and hide
+  // the manager's error/retry state. Let React Query see the error.
+  const readError = stagesError ?? questionsError;
+  if (readError) {
+    throw new AppError('UNKNOWN', `Không tải được danh sách chặng: ${readError.message}`);
+  }
 
   const byStage = new Map<string, AdminQuestion[]>();
   for (const q of questions ?? []) {
