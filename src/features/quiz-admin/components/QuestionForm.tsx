@@ -1,11 +1,15 @@
 'use client';
 
 import { useState } from 'react';
+import { Plus, X } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import type { QuestionType } from '@/types/database.types';
 import type { AdminQuestion, QuestionInput } from '../services/quiz-admin.service';
 
 const BOOL_OPTIONS = ['Đúng', 'Sai'];
+
+const inputClass =
+  'rounded-lg border border-amber-200 bg-white px-3 py-2 text-sm outline-none transition focus:border-amber-400 focus:ring-2 focus:ring-amber-200';
 
 /**
  * Create/edit a question of any type. 'boolean' uses fixed Đúng/Sai options;
@@ -84,12 +88,12 @@ export function QuestionForm({
     });
 
   return (
-    <div className="space-y-2 rounded border border-amber-200 bg-amber-50/40 p-3">
+    <div className="space-y-2.5 rounded-2xl border border-amber-200 bg-amber-50/50 p-4">
       <div className="flex items-center gap-2">
         <select
           value={type}
           onChange={(e) => changeType(e.target.value as QuestionType)}
-          className="rounded border px-2 py-1 text-sm"
+          className={`text-sm ${inputClass}`}
         >
           <option value="single">1 đáp án</option>
           <option value="multiple">Nhiều đáp án</option>
@@ -102,17 +106,17 @@ export function QuestionForm({
         value={prompt}
         onChange={(e) => setPrompt(e.target.value)}
         placeholder="Nội dung câu hỏi"
-        className="w-full rounded border px-2 py-1"
+        className={`w-full ${inputClass}`}
       />
 
-      <div className="space-y-1">
+      <div className="space-y-1.5">
         {effectiveOptions.map((opt, idx) => (
           <div key={idx} className="flex items-center gap-2">
             <input
               type={type === 'multiple' ? 'checkbox' : 'radio'}
               checked={correct.includes(idx)}
               onChange={() => toggleCorrect(idx)}
-              className="accent-brand"
+              className="accent-emerald-600"
               aria-label={`Đáp án đúng ${idx + 1}`}
             />
             {isBool ? (
@@ -122,33 +126,40 @@ export function QuestionForm({
                 value={opt}
                 onChange={(e) => updateOption(idx, e.target.value)}
                 placeholder={`Đáp án ${idx + 1}`}
-                className="flex-1 rounded border px-2 py-1"
+                className={`flex-1 ${inputClass}`}
               />
             )}
             {!isBool && options.length > 2 && (
               <button
                 onClick={() => removeOption(idx)}
-                className="text-xs text-red-500"
                 aria-label="Xoá đáp án"
+                className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-neutral-400 transition hover:bg-red-100 hover:text-red-600"
               >
-                ✕
+                <X className="h-3.5 w-3.5" aria-hidden />
               </button>
             )}
           </div>
         ))}
         {!isBool && (
-          <button onClick={addOption} className="text-xs text-brand">
-            + Thêm đáp án
+          <button
+            onClick={addOption}
+            className="flex items-center gap-1 text-xs font-medium text-amber-700 hover:text-amber-900"
+          >
+            <Plus className="h-3.5 w-3.5" aria-hidden /> Thêm đáp án
           </button>
         )}
       </div>
 
       <div className="flex gap-2">
-        <Button onClick={submit} disabled={pending || !valid}>
+        <Button
+          onClick={submit}
+          disabled={pending || !valid}
+          className="rounded-lg bg-amber-500 hover:bg-amber-600 hover:opacity-100"
+        >
           {pending ? 'Đang lưu…' : 'Lưu câu hỏi'}
         </Button>
         {onCancel && (
-          <Button variant="secondary" onClick={onCancel}>
+          <Button variant="secondary" onClick={onCancel} className="rounded-lg">
             Huỷ
           </Button>
         )}
