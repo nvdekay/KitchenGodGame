@@ -19,8 +19,8 @@ const TYPE_LABEL: Record<AdminQuestion['type'], string> = {
 
 const TYPE_BADGE: Record<AdminQuestion['type'], string> = {
   single: 'bg-sky-100 text-sky-700',
-  multiple: 'bg-violet-100 text-violet-700',
-  boolean: 'bg-amber-100 text-amber-700',
+  multiple: 'bg-red-100 text-brand',
+  boolean: 'bg-amber-100 text-amber-800',
 };
 
 /** Top-level quiz content manager: stages (CRUD) each containing questions (CRUD). */
@@ -52,7 +52,7 @@ export function QuizManager() {
     <section className="space-y-5">
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-violet-100 text-violet-600">
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-red-100 text-brand">
             <BookOpenText className="h-5 w-5" aria-hidden />
           </span>
           <div>
@@ -60,10 +60,7 @@ export function QuizManager() {
             <p className="text-sm text-neutral-500">Quản lý các chặng và câu hỏi trong game.</p>
           </div>
         </div>
-        <Button
-          onClick={() => setAddingStage((v) => !v)}
-          className="rounded-xl bg-gradient-to-br from-violet-500 to-violet-600 shadow-sm shadow-violet-300/50 hover:opacity-95"
-        >
+        <Button onClick={() => setAddingStage((v) => !v)} className="rounded-xl">
           {addingStage ? (
             'Đóng'
           ) : (
@@ -132,7 +129,7 @@ function StageCard({
       ) : (
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-start gap-3">
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-violet-100 text-sm font-bold text-violet-700">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-red-100 text-sm font-bold text-brand">
               {stage.ord}
             </span>
             <div>
@@ -144,7 +141,7 @@ function StageCard({
             <button
               onClick={() => setEditing(true)}
               aria-label="Sửa chặng"
-              className="flex h-8 w-8 items-center justify-center rounded-lg text-neutral-500 transition hover:bg-violet-50 hover:text-violet-700"
+              className="flex h-8 w-8 items-center justify-center rounded-lg text-neutral-500 transition hover:bg-red-50 hover:text-brand"
             >
               <Pencil className="h-4 w-4" aria-hidden />
             </button>
@@ -200,7 +197,7 @@ function StageCard({
                 <button
                   onClick={() => setEditQ(q.id)}
                   aria-label="Sửa câu hỏi"
-                  className="flex h-7 w-7 items-center justify-center rounded-lg text-neutral-500 transition hover:bg-violet-100 hover:text-violet-700"
+                  className="flex h-7 w-7 items-center justify-center rounded-lg text-neutral-500 transition hover:bg-red-100 hover:text-brand"
                 >
                   <Pencil className="h-3.5 w-3.5" aria-hidden />
                 </button>
@@ -233,7 +230,7 @@ function StageCard({
       ) : (
         <button
           onClick={() => setAddingQ(true)}
-          className="flex items-center gap-1.5 text-sm font-medium text-violet-600 hover:text-violet-800"
+          className="flex items-center gap-1.5 text-sm font-medium text-brand hover:text-red-900"
         >
           <Plus className="h-4 w-4" aria-hidden /> Thêm câu hỏi
         </button>

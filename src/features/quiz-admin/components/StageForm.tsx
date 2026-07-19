@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/Button';
 import type { AdminStage, StageInput } from '../services/quiz-admin.service';
 
 const inputClass =
-  'rounded-lg border border-violet-200 bg-white px-3 py-2 text-sm outline-none transition focus:border-violet-400 focus:ring-2 focus:ring-violet-200';
+  'rounded-lg border border-red-200 bg-white px-3 py-2 text-sm outline-none transition focus:border-brand focus:ring-2 focus:ring-red-200';
 
 /** Create/edit a stage (order, title, description). */
 export function StageForm({
@@ -31,7 +31,7 @@ export function StageForm({
   const canSubmit = title.trim() !== '' && ordValid;
 
   return (
-    <div className="space-y-2.5 rounded-2xl border border-violet-200 bg-violet-50/50 p-4">
+    <div className="space-y-2.5 rounded-2xl border border-red-200 bg-red-50/50 p-4">
       <div className="flex gap-2">
         <input
           type="number"
@@ -57,7 +57,7 @@ export function StageForm({
         <Button
           onClick={() => onSubmit({ ord, title: title.trim(), description: description.trim() || null })}
           disabled={pending || !canSubmit}
-          className="rounded-lg bg-violet-600 hover:bg-violet-700 hover:opacity-100"
+          className="rounded-lg"
         >
           {pending ? 'Đang lưu…' : 'Lưu'}
         </Button>

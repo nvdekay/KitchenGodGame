@@ -7,8 +7,8 @@ import { DashboardSkeleton } from './DashboardSkeleton';
 import { RankingTable } from './RankingTable';
 
 const STAT_COLORS = {
-  sky: 'from-sky-400 to-sky-600',
-  emerald: 'from-emerald-400 to-emerald-600',
+  sky: 'bg-sky-600',
+  amber: 'bg-amber-500',
 } as const;
 
 function StatCard({
@@ -26,7 +26,7 @@ function StatCard({
     <div className="flex items-center gap-4 rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm">
       <span
         className={cn(
-          'flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br text-white',
+          'flex h-12 w-12 shrink-0 items-center justify-center rounded-xl text-white',
           STAT_COLORS[color],
         )}
       >
@@ -64,7 +64,7 @@ export function LeaderboardOverview() {
     <div className="space-y-8">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <StatCard label="Người chơi đã bắt đầu" value={data.players.length} icon={Users} color="sky" />
-        <StatCard label="Đã hoàn thành" value={data.ranking.length} icon={Trophy} color="emerald" />
+        <StatCard label="Đã hoàn thành" value={data.ranking.length} icon={Trophy} color="amber" />
       </div>
 
       <section>

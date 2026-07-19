@@ -28,7 +28,7 @@ export function QuizDashboard() {
   return (
     <div className="space-y-8">
       <div className="flex items-center gap-3">
-        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-600">
+        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-700">
           <Activity className="h-5 w-5" aria-hidden />
         </span>
         <div>
@@ -60,7 +60,7 @@ export function QuizDashboard() {
           <div className="overflow-x-auto rounded-2xl border border-neutral-200 bg-white shadow-sm">
             <table className="w-full text-sm">
               <thead>
-                <tr className="bg-gradient-to-r from-emerald-50 to-white text-left text-neutral-500">
+                <tr className="bg-emerald-50 text-left text-neutral-500">
                   <th className="px-4 py-3 font-medium">Người chơi</th>
                   {d.stageOrds.map((ord) => (
                     <th key={ord} className="px-3 py-3 text-center font-medium">

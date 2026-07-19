@@ -10,11 +10,7 @@ export function formatDuration(ms: number): string {
   return h > 0 ? `${h}:${pad(m)}:${pad(s)}` : `${m}:${pad(s)}`;
 }
 
-const RANK_BADGE = [
-  'bg-gradient-to-br from-amber-300 to-amber-500 text-amber-950 shadow-sm shadow-amber-300/50',
-  'bg-gradient-to-br from-slate-200 to-slate-400 text-slate-800',
-  'bg-gradient-to-br from-orange-300 to-orange-500 text-orange-950',
-];
+const RANK_BADGE = ['bg-amber-400 text-amber-950', 'bg-slate-300 text-slate-700', 'bg-orange-400 text-orange-950'];
 
 /** Finish-time ranking table: username + total active play time, fastest first. */
 export function RankingTable({ ranking }: { ranking: PlayerRow[] }) {
@@ -30,7 +26,7 @@ export function RankingTable({ ranking }: { ranking: PlayerRow[] }) {
     <div className="overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm">
       <table className="w-full text-sm">
         <thead>
-          <tr className="bg-gradient-to-r from-amber-50 to-white text-left text-neutral-500">
+          <tr className="bg-amber-50 text-left text-neutral-500">
             <th className="w-16 px-4 py-3 font-medium">#</th>
             <th className="px-4 py-3 font-medium">Người chơi</th>
             <th className="px-4 py-3 font-medium">Tổng thời gian</th>

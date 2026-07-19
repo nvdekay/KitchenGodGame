@@ -12,9 +12,9 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const initial = (admin.username ?? admin.email ?? '?').charAt(0).toUpperCase();
 
   return (
-    <div className="flex min-h-screen bg-gradient-to-br from-slate-50 via-sky-50/40 to-violet-50/30">
+    <div className="flex min-h-screen bg-amber-50/40">
       <aside className="flex w-64 shrink-0 flex-col border-r border-slate-200 bg-white shadow-sm">
-        <div className="bg-gradient-to-br from-indigo-600 via-violet-600 to-fuchsia-600 px-5 py-6 text-white">
+        <div className="bg-brand px-5 py-6 text-white">
           <p className="text-xs font-semibold uppercase tracking-wider text-white/70">Admin Panel</p>
           <Link href="/admin" className="mt-1 block text-lg font-extrabold leading-snug hover:underline">
             Các Táo Lên Chầu

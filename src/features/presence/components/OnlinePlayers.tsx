@@ -8,7 +8,7 @@ export function OnlinePlayers() {
 
   return (
     <div className="overflow-hidden rounded-2xl border border-sky-100 bg-white shadow-sm">
-      <div className="flex items-center gap-2 border-b border-sky-100 bg-gradient-to-r from-sky-50 to-white px-5 py-4">
+      <div className="flex items-center gap-2 border-b border-sky-100 bg-sky-50 px-5 py-4">
         <span className="relative flex h-2.5 w-2.5">
           <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
           <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500" />
@@ -31,7 +31,7 @@ export function OnlinePlayers() {
                 <span className="truncate font-medium text-neutral-800">{p.username}</span>
               </div>
               {p.stage !== null ? (
-                <span className="shrink-0 rounded-full bg-violet-100 px-2.5 py-1 text-xs font-medium text-violet-700">
+                <span className="shrink-0 rounded-full bg-amber-100 px-2.5 py-1 text-xs font-medium text-amber-800">
                   Đang làm · Chặng {p.stage}
                 </span>
               ) : (

@@ -5,43 +5,45 @@ import { usePathname } from 'next/navigation';
 import { LayoutDashboard, Trophy, BookOpenText, Activity, type LucideIcon } from 'lucide-react';
 import { cn } from '@/utils/cn';
 
-type Color = 'sky' | 'amber' | 'violet' | 'emerald';
+type Color = 'sky' | 'amber' | 'brand' | 'jade';
 
 /**
  * Admin sidebar navigation. Add future admin sections here — each is just a
  * route under /admin guarded by the admin layout. Keep this a data-driven list
  * so adding "Analytics" or "Content" later is a one-line change. Each item
  * carries its own accent color so the sidebar reads as a set of distinct
- * sections rather than one flat list.
+ * sections rather than one flat list. Colors are drawn from the game's own
+ * palette (sky "heaven", gold, the brand red, jade green) rather than a
+ * generic tech-dashboard hue set.
  */
 const NAV_ITEMS: readonly { href: string; label: string; icon: LucideIcon; color: Color }[] = [
   { href: '/admin', label: 'Tổng quan', icon: LayoutDashboard, color: 'sky' },
   { href: '/admin/leaderboard', label: 'Thống kê & Xếp hạng', icon: Trophy, color: 'amber' },
-  { href: '/admin/quiz', label: 'Câu hỏi', icon: BookOpenText, color: 'violet' },
-  { href: '/admin/users', label: 'Theo dõi', icon: Activity, color: 'emerald' },
-  // { href: '/admin/analytics', label: 'Analytics', icon: BarChart3, color: 'rose' },   // future
+  { href: '/admin/quiz', label: 'Câu hỏi', icon: BookOpenText, color: 'brand' },
+  { href: '/admin/users', label: 'Theo dõi', icon: Activity, color: 'jade' },
+  // { href: '/admin/analytics', label: 'Analytics', icon: BarChart3, color: 'jade' },   // future
 ];
 
 const COLOR_STYLES: Record<Color, { active: string; icon: string; hover: string }> = {
   sky: {
     active: 'bg-sky-50 text-sky-700 ring-1 ring-inset ring-sky-200',
-    icon: 'bg-sky-500 text-white',
+    icon: 'bg-sky-600 text-white',
     hover: 'hover:bg-sky-50/80 hover:text-sky-700',
   },
   amber: {
-    active: 'bg-amber-50 text-amber-700 ring-1 ring-inset ring-amber-200',
+    active: 'bg-amber-50 text-amber-800 ring-1 ring-inset ring-amber-200',
     icon: 'bg-amber-500 text-white',
-    hover: 'hover:bg-amber-50/80 hover:text-amber-700',
+    hover: 'hover:bg-amber-50/80 hover:text-amber-800',
   },
-  violet: {
-    active: 'bg-violet-50 text-violet-700 ring-1 ring-inset ring-violet-200',
-    icon: 'bg-violet-500 text-white',
-    hover: 'hover:bg-violet-50/80 hover:text-violet-700',
+  brand: {
+    active: 'bg-red-50 text-brand ring-1 ring-inset ring-red-200',
+    icon: 'bg-brand text-white',
+    hover: 'hover:bg-red-50/80 hover:text-brand',
   },
-  emerald: {
-    active: 'bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-200',
-    icon: 'bg-emerald-500 text-white',
-    hover: 'hover:bg-emerald-50/80 hover:text-emerald-700',
+  jade: {
+    active: 'bg-emerald-50 text-emerald-800 ring-1 ring-inset ring-emerald-200',
+    icon: 'bg-emerald-700 text-white',
+    hover: 'hover:bg-emerald-50/80 hover:text-emerald-800',
   },
 };
 
