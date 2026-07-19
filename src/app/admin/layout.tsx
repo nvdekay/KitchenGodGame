@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { requireAdmin } from '@/features/admin/services/admin.guard';
 import { AdminNav } from '@/features/admin/components/AdminNav';
+import { AdminLogoutButton } from '@/features/admin/components/AdminLogoutButton';
 
 /**
  * Admin layout. `requireAdmin()` runs server-side BEFORE any admin UI renders —
@@ -27,6 +28,9 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           </div>
         </div>
         <AdminNav />
+        <div className="mt-auto border-t border-slate-100 p-4">
+          <AdminLogoutButton />
+        </div>
       </aside>
       <main className="flex-1 p-8">{children}</main>
     </div>
