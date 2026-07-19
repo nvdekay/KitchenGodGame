@@ -40,10 +40,13 @@ export function useSignIn(redirectTo: string = '/map') {
     onSuccess: (user) => {
       setUser(user);
       qc.invalidateQueries();
+      // Admins always land on the stats/leaderboard screen, ignoring any
+      // bounced-back `redirectTo` — everyone else goes where they were headed.
+      const target = user.role === 'admin' ? '/admin/leaderboard' : redirectTo;
       // Full navigation (not router.push) so the shared browser Supabase client
       // re-initialises from the freshly-set auth cookies — otherwise its
       // in-memory session stays anonymous and RLS-guarded reads on /map fail.
-      window.location.assign(redirectTo);
+      window.location.assign(target);
     },
   });
 }

@@ -11,6 +11,7 @@ import { cn } from '@/utils/cn';
  */
 const NAV_ITEMS = [
   { href: '/admin', label: 'Tổng quan' },
+  { href: '/admin/leaderboard', label: 'Thống kê & Xếp hạng' },
   { href: '/admin/quiz', label: 'Câu hỏi' },
   { href: '/admin/users', label: 'Theo dõi' },
   // { href: '/admin/analytics', label: 'Analytics' },   // future
