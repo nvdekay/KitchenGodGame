@@ -2,7 +2,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 /**
- * Auth-screen shell (login + signup). Reuses the game's sky background and drops
+ * Auth-screen shell (login). Reuses the game's sky background and drops
  * a frosted card in the centre so the auth pages feel like part of the game flow
  * rather than a bare form. Each page just renders its heading + form as children.
  *

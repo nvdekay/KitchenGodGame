@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { loginSchema, type LoginInput } from '../schemas/auth.schema';
@@ -9,17 +8,11 @@ import { Button } from '@/components/ui/Button';
 import { isAppError } from '@/lib/errors';
 
 /**
- * Sign-in form. The single identifier field accepts an email OR a username; a
- * server action resolves a username to its email (server-side, never exposing
- * emails) before calling Supabase.
+ * Sign-in form: username only. No password, no separate registration step —
+ * an unrecognized username is auto-provisioned server-side on first login
+ * (see actions/sign-in.action).
  */
-export function LoginForm({
-  justRegistered = false,
-  redirectTo = '/map',
-}: {
-  justRegistered?: boolean;
-  redirectTo?: string;
-}) {
+export function LoginForm({ redirectTo = '/map' }: { redirectTo?: string }) {
   const signIn = useSignIn(redirectTo);
   const {
     register,
@@ -31,40 +24,19 @@ export function LoginForm({
 
   return (
     <form onSubmit={onSubmit} className="flex w-full max-w-sm flex-col gap-4">
-      {justRegistered && (
-        <p className="rounded bg-green-50 px-3 py-2 text-sm text-green-700">
-          Đăng ký thành công! Đăng nhập để bắt đầu.
-        </p>
-      )}
-
       <div className="flex flex-col gap-1">
-        <label htmlFor="identifier" className="text-sm font-medium">
-          Email hoặc Username
+        <label htmlFor="username" className="text-sm font-medium">
+          Username
         </label>
         <input
-          id="identifier"
+          id="username"
           type="text"
           autoComplete="username"
+          autoFocus
           className="rounded-lg border border-sky-200 bg-white px-3 py-2.5 outline-none transition focus:border-sky-400 focus:ring-2 focus:ring-sky-200"
-          {...register('identifier')}
+          {...register('username')}
         />
-        {errors.identifier && (
-          <p className="text-sm text-red-600">{errors.identifier.message}</p>
-        )}
-      </div>
-
-      <div className="flex flex-col gap-1">
-        <label htmlFor="password" className="text-sm font-medium">
-          Mật khẩu
-        </label>
-        <input
-          id="password"
-          type="password"
-          autoComplete="current-password"
-          className="rounded-lg border border-sky-200 bg-white px-3 py-2.5 outline-none transition focus:border-sky-400 focus:ring-2 focus:ring-sky-200"
-          {...register('password')}
-        />
-        {errors.password && <p className="text-sm text-red-600">{errors.password.message}</p>}
+        {errors.username && <p className="text-sm text-red-600">{errors.username.message}</p>}
       </div>
 
       {signIn.isError && (
@@ -74,15 +46,8 @@ export function LoginForm({
       )}
 
       <Button type="submit" loading={isSubmitting || signIn.isPending}>
-        {signIn.isPending ? 'Đang đăng nhập…' : 'Đăng nhập'}
+        {signIn.isPending ? 'Đang vào game…' : 'Vào game'}
       </Button>
-
-      <p className="text-center text-sm text-neutral-600">
-        Chưa có tài khoản?{' '}
-        <Link href="/signup" className="font-medium text-brand hover:underline">
-          Đăng ký
-        </Link>
-      </p>
     </form>
   );
 }

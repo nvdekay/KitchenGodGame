@@ -7,31 +7,21 @@ import { z } from 'zod';
  */
 
 /**
- * Login accepts EITHER an email OR a username in a single `identifier` field.
- * The server action resolves a username to its email before calling Supabase
- * Auth (which only authenticates by email). See actions/sign-in.action.
+ * Login is username-only: no password, no separate registration step. The
+ * server action derives a hidden deterministic credential from the username
+ * and auto-provisions the account on first login (see actions/sign-in.action).
+ * `username` is also the stable handle admins use to track a player, so it is
+ * constrained to URL/handle-safe characters (plus '@' for preconfigured
+ * handles like "admin@nhom8") and enforced case-insensitively unique in the DB
+ * (migration 0002) with a matching format CHECK (migrations 0011, 0012).
  */
 export const loginSchema = z.object({
-  identifier: z.string().min(1, 'Nhập email hoặc username.'),
-  password: z.string().min(1, 'Nhập mật khẩu.'),
+  username: z
+    .string()
+    .trim()
+    .min(3, 'Username tối thiểu 3 ký tự.')
+    .max(32, 'Username tối đa 32 ký tự.')
+    .regex(/^[a-zA-Z0-9_@]+$/, 'Chỉ gồm chữ, số, dấu gạch dưới và @.'),
 });
 
 export type LoginInput = z.infer<typeof loginSchema>;
-
-/**
- * Signup collects email + username + password. `username` is the canonical
- * display name in-game AND the stable handle admins use to track a player, so
- * we constrain it to URL/handle-safe characters and enforce uniqueness in the DB
- * (case-insensitive — see migration 0002).
- */
-export const signupSchema = z.object({
-  email: z.string().email('Email không hợp lệ.'),
-  username: z
-    .string()
-    .min(3, 'Username tối thiểu 3 ký tự.')
-    .max(24, 'Username tối đa 24 ký tự.')
-    .regex(/^[a-zA-Z0-9_]+$/, 'Chỉ gồm chữ, số và dấu gạch dưới.'),
-  password: z.string().min(8, 'Mật khẩu tối thiểu 8 ký tự.'),
-});
-
-export type SignupInput = z.infer<typeof signupSchema>;

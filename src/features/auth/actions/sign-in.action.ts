@@ -1,7 +1,9 @@
 'use server';
 
+import { createHash, createHmac } from 'node:crypto';
 import { createClient, createAdminClient } from '@/lib/supabase/server';
 import { getAuthUser } from '@/services/profile.service';
+import { getServerEnv } from '@/lib/env';
 import { createLogger } from '@/lib/logger';
 import type { AuthUser } from '@/types/auth.types';
 import { loginSchema, type LoginInput } from '../schemas/auth.schema';
@@ -9,50 +11,73 @@ import { loginSchema, type LoginInput } from '../schemas/auth.schema';
 const log = createLogger('feature:auth');
 
 /**
- * Server-side sign-in.
+ * Passwordless, username-only sign-in that merges registration into login.
  *
- * WHY server-side: username→email resolution must never expose emails to the
- * client. `get_email_for_username` is SECURITY DEFINER; leaving it callable by
- * `anon` let anyone enumerate usernames (via the public leaderboard) and then
- * harvest every player's email. Here the lookup runs through the service-role
- * client, so migration 0010 can revoke the anon grant — the email is resolved
- * and consumed entirely on the server and is never returned to the browser.
+ * Supabase Auth only authenticates by email+password, so a hidden credential
+ * pair is derived DETERMINISTICALLY from the username (never shown to the
+ * player, never stored — recomputed here from a server-only pepper each time):
+ *  - email: a hash of the username in a fixed internal domain, so it's always
+ *    valid email syntax no matter what characters the username contains.
+ *  - password: an HMAC of the username keyed by AUTH_USERNAME_PEPPER.
  *
- * The sign-in itself uses the request-bound SSR client so the rotated auth
- * cookies are written for middleware/SSR. The client store is hydrated from the
- * returned AuthUser (see useSignIn).
+ * First login with a given username auto-provisions the account (via the
+ * service-role admin client, which still runs the migration-0001 trigger that
+ * creates the `profiles`/`user_roles` rows) and signs it straight in. This is
+ * intentionally NOT real authentication — anyone who knows a username can log
+ * in as that player — which was an explicit, agreed tradeoff for this
+ * classroom game.
  */
-async function resolveEmail(identifier: string): Promise<string | null> {
-  const id = identifier.trim();
-  if (id.includes('@')) return id;
-  const admin = createAdminClient();
-  const { data, error } = await admin.rpc('get_email_for_username', { p_username: id });
-  if (error) log.warn('username resolution failed', { message: error.message });
-  return data ?? null;
+function deriveCredentials(username: string): { email: string; password: string } {
+  const key = username.trim().toLowerCase();
+  const { AUTH_USERNAME_PEPPER } = getServerEnv();
+  const emailLocal = createHash('sha256').update(key).digest('hex').slice(0, 32);
+  const email = `p-${emailLocal}@players.internal`;
+  const password = createHmac('sha256', AUTH_USERNAME_PEPPER).update(key).digest('hex');
+  return { email, password };
 }
 
 export type SignInResult = { ok: true; user: AuthUser } | { ok: false; message: string };
 
 export async function signInAction(input: LoginInput): Promise<SignInResult> {
   const parsed = loginSchema.safeParse(input);
-  if (!parsed.success) return { ok: false, message: 'Thông tin đăng nhập không hợp lệ.' };
-
-  const email = await resolveEmail(parsed.data.identifier);
-  // Same generic error whether the username is unknown or the password is wrong
-  // — never reveal which usernames/emails exist.
-  if (!email) return { ok: false, message: 'Sai tài khoản hoặc mật khẩu.' };
-
-  const supabase = await createClient();
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email,
-    password: parsed.data.password,
-  });
-  if (error || !data.user) {
-    log.warn('sign-in failed', { message: error?.message });
-    return { ok: false, message: 'Sai tài khoản hoặc mật khẩu.' };
+  if (!parsed.success) {
+    return { ok: false, message: parsed.error.issues[0]?.message ?? 'Username không hợp lệ.' };
   }
 
-  const user = await getAuthUser(supabase, { id: data.user.id, email: data.user.email ?? null });
+  const username = parsed.data.username;
+  const { email, password } = deriveCredentials(username);
+
+  const supabase = await createClient();
+  let signIn = await supabase.auth.signInWithPassword({ email, password });
+
+  if (signIn.error) {
+    // Unknown username (or another sign-in failure) — try auto-provisioning.
+    // If the account actually exists for another reason, createUser fails
+    // with an "already registered" error and we fall through to the generic
+    // failure message below.
+    const admin = createAdminClient();
+    const { error: createError } = await admin.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: true,
+      user_metadata: { username },
+    });
+    if (createError) {
+      log.warn('auto-provision failed', { message: createError.message });
+      return { ok: false, message: 'Không thể đăng nhập với username này, thử tên khác.' };
+    }
+    signIn = await supabase.auth.signInWithPassword({ email, password });
+  }
+
+  if (signIn.error || !signIn.data.user) {
+    log.warn('sign-in failed', { message: signIn.error?.message });
+    return { ok: false, message: 'Không thể đăng nhập với username này, thử tên khác.' };
+  }
+
+  const user = await getAuthUser(supabase, {
+    id: signIn.data.user.id,
+    email: signIn.data.user.email ?? null,
+  });
   if (!user) return { ok: false, message: 'Không tìm thấy hồ sơ cho tài khoản này.' };
 
   return { ok: true, user };

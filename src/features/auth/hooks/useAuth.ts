@@ -6,7 +6,7 @@ import { useAuthStore, selectIsAdmin, selectIsAuthenticated } from '@/stores/aut
 import { AppError } from '@/lib/errors';
 import * as authService from '../services/auth.service';
 import { signInAction } from '../actions/sign-in.action';
-import type { LoginInput, SignupInput } from '../schemas/auth.schema';
+import type { LoginInput } from '../schemas/auth.schema';
 
 /**
  * The feature's React surface. Components import ONLY from here (and the
@@ -44,18 +44,6 @@ export function useSignIn(redirectTo: string = '/map') {
       // re-initialises from the freshly-set auth cookies — otherwise its
       // in-memory session stays anonymous and RLS-guarded reads on /map fail.
       window.location.assign(redirectTo);
-    },
-  });
-}
-
-export function useSignUp() {
-  const router = useRouter();
-  return useMutation({
-    mutationFn: (input: SignupInput) => authService.signUp(input),
-    onSuccess: () => {
-      // Per product flow: after registering, send the user to the login page
-      // (we do not auto-sign-in). The banner there confirms success.
-      router.push('/login?registered=1');
     },
   });
 }

@@ -39,7 +39,7 @@ export async function updateSession(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Route protection rules. Extend as new protected areas are added.
-  const isAuthRoute = pathname.startsWith('/login') || pathname.startsWith('/signup');
+  const isAuthRoute = pathname.startsWith('/login');
   const isProtected =
     pathname.startsWith('/map') ||
     pathname.startsWith('/chang') ||

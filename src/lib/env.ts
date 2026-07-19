@@ -33,6 +33,13 @@ const clientSchema = z.object({
 
 const serverSchema = z.object({
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(1),
+  /**
+   * Secret pepper used to deterministically derive the hidden Supabase Auth
+   * password from a player's username (see features/auth/actions/sign-in
+   * .action). Never exposed to the client; rotating it invalidates every
+   * existing player's derived credential (they'd need a new account).
+   */
+  AUTH_USERNAME_PEPPER: z.string().min(16),
 });
 
 // Next.js statically replaces NEXT_PUBLIC_* references, so we must read them
@@ -59,6 +66,7 @@ export const clientEnv = clientParsed.data;
 export function getServerEnv() {
   const parsed = serverSchema.safeParse({
     SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
+    AUTH_USERNAME_PEPPER: process.env.AUTH_USERNAME_PEPPER,
   });
   if (!parsed.success) {
     throw new Error(
