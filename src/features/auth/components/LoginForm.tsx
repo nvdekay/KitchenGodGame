@@ -36,6 +36,9 @@ export function LoginForm({ redirectTo = '/map' }: { redirectTo?: string }) {
           className="rounded-lg border border-sky-200 bg-white px-3 py-2.5 outline-none transition focus:border-sky-400 focus:ring-2 focus:ring-sky-200"
           {...register('username')}
         />
+        <p className="text-xs text-neutral-500">
+          Đây là tên hiển thị trong game — hãy đặt tên để bọn mình biết bạn là ai nhé!
+        </p>
         {errors.username && <p className="text-sm text-red-600">{errors.username.message}</p>}
       </div>
 
