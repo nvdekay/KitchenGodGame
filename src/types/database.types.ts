@@ -56,29 +56,6 @@ export interface Database {
         Update: { role?: AppRole };
         Relationships: [];
       };
-      player_progress: {
-        Row: {
-          user_id: string;
-          best_level: number;
-          best_score: number;
-          last_played_at: string | null;
-          updated_at: string;
-        };
-        Insert: {
-          user_id: string;
-          best_level?: number;
-          best_score?: number;
-          last_played_at?: string | null;
-          updated_at?: string;
-        };
-        Update: {
-          best_level?: number;
-          best_score?: number;
-          last_played_at?: string | null;
-          updated_at?: string;
-        };
-        Relationships: [];
-      };
       stages: {
         Row: { id: string; ord: number; title: string; description: string | null; created_at: string };
         Insert: { id?: string; ord: number; title: string; description?: string | null; created_at?: string };
@@ -157,14 +134,6 @@ export interface Database {
       get_email_for_username: {
         Args: { p_username: string };
         Returns: string;
-      };
-      record_level_progress: {
-        Args: { p_level: number; p_score: number };
-        Returns: undefined;
-      };
-      get_leaderboard: {
-        Args: { p_limit?: number };
-        Returns: { username: string; best_level: number; best_score: number }[];
       };
       get_stage: {
         Args: { p_ord: number };
